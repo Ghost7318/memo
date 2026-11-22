@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700&family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
-  
+
   <style>
     :root {
       /* 落ち着きのあるラテ＆アイボリー配色 */
@@ -16,7 +16,6 @@
       --bg-sidebar: #F3EFEA;
       --bg-card: #FFFFFF;
       --bg-hover: #EAE4DC;
-      --bg-active: #E5DDD3;
       --text-main: #4A4238;
       --text-muted: #8C8275;
       --text-light: #B5ACA0;
@@ -26,7 +25,6 @@
       --danger: #D97A7A;
       --danger-soft: #FAEBEB;
       --border: #E6DFD5;
-      --shadow: 0 4px 12px rgba(74, 66, 56, 0.05);
       --radius-lg: 16px;
       --radius-md: 12px;
       --radius-sm: 8px;
@@ -68,7 +66,6 @@
       flex-direction: column;
       height: 100%;
       flex-shrink: 0;
-      transition: transform 0.3s ease;
     }
 
     .sidebar-header {
@@ -76,10 +73,11 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 8px;
     }
 
     .app-title {
-      font-size: 1.25rem;
+      font-size: 1.2rem;
       font-weight: 700;
       color: var(--text-main);
       display: flex;
@@ -97,7 +95,34 @@
       background-color: var(--accent-soft);
       color: var(--accent);
       border-radius: 10px;
-      font-size: 1.1rem;
+      font-size: 1.05rem;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-guide {
+      background-color: var(--bg-card);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 8px 10px;
+      font-family: inherit;
+      font-size: 0.8rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-guide:hover,
+    .btn-guide.active {
+      background-color: var(--accent-soft);
+      border-color: var(--accent);
+      color: var(--text-main);
+      font-weight: 700;
     }
 
     .btn-new {
@@ -105,14 +130,14 @@
       color: #FFFFFF;
       border: none;
       border-radius: var(--radius-md);
-      padding: 8px 14px;
+      padding: 8px 12px;
       font-family: inherit;
-      font-size: 0.875rem;
+      font-size: 0.85rem;
       font-weight: 700;
       cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 4px;
       box-shadow: 0 2px 6px rgba(200, 157, 124, 0.3);
       transition: background-color 0.2s, transform 0.1s;
     }
@@ -188,6 +213,7 @@
     .note-list::-webkit-scrollbar {
       width: 6px;
     }
+
     .note-list::-webkit-scrollbar-thumb {
       background-color: var(--border);
       border-radius: 3px;
@@ -201,7 +227,6 @@
       cursor: pointer;
       transition: all 0.2s ease;
       box-shadow: 0 2px 5px rgba(74, 66, 56, 0.02);
-      position: relative;
     }
 
     .note-card:hover {
@@ -253,7 +278,6 @@
       color: var(--text-light);
     }
 
-    /* 空状態 */
     .empty-list {
       text-align: center;
       padding: 40px 20px;
@@ -262,17 +286,18 @@
       line-height: 1.7;
     }
 
-    /* ================= メイン（エディタ画面） ================= */
-    .editor-area {
+    /* ================= メイン（エディタ / チュートリアル） ================= */
+    .main-area {
       flex: 1;
       display: flex;
       flex-direction: column;
       background-color: var(--bg-main);
       height: 100%;
       position: relative;
+      overflow: hidden;
     }
 
-    .editor-toolbar {
+    .top-toolbar {
       padding: 16px 28px;
       border-bottom: 1px solid var(--border);
       display: flex;
@@ -289,10 +314,9 @@
     }
 
     .btn-back {
-      display: none; /* PCでは非表示 */
-      background: none;
-      border: 1px solid var(--border);
+      display: none;
       background-color: var(--bg-card);
+      border: 1px solid var(--border);
       color: var(--text-main);
       border-radius: var(--radius-sm);
       padding: 6px 12px;
@@ -363,7 +387,13 @@
       color: var(--danger);
     }
 
-    /* エディタ本文入力エリア */
+    /* エディタ入力画面 */
+    #editorView {
+      display: none;
+      flex-direction: column;
+      height: 100%;
+    }
+
     .editor-content {
       flex: 1;
       display: flex;
@@ -425,8 +455,8 @@
       color: var(--text-muted);
     }
 
-    /* メモ未選択時のプレースホルダー */
-    .no-note-selected {
+    /* メモ未選択画面 */
+    #noNoteView {
       flex: 1;
       display: flex;
       flex-direction: column;
@@ -450,6 +480,71 @@
       color: var(--accent);
     }
 
+    /* ================= チュートリアル画面（メモ帳の使い方のみ） ================= */
+    #tutorialView {
+      display: none;
+      flex-direction: column;
+      height: 100%;
+      overflow-y: auto;
+    }
+
+    .tutorial-body {
+      max-width: 760px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 32px 36px 48px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .tutorial-hero {
+      background-color: var(--accent-soft);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+    }
+
+    .tutorial-hero h1 {
+      font-size: 1.4rem;
+      margin-bottom: 8px;
+      color: var(--text-main);
+    }
+
+    .tutorial-hero p {
+      font-size: 0.95rem;
+      line-height: 1.75;
+      color: var(--text-muted);
+    }
+
+    .guide-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 20px 22px;
+    }
+
+    .guide-card h2 {
+      font-size: 1.05rem;
+      margin-bottom: 8px;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .guide-card p {
+      font-size: 0.92rem;
+      line-height: 1.8;
+      color: var(--text-muted);
+    }
+
+    .tutorial-actions {
+      display: flex;
+      justify-content: flex-start;
+      padding-top: 4px;
+    }
+
     /* ================= スマホ向けレスポンシブ設定 ================= */
     @media (max-width: 768px) {
       .sidebar {
@@ -457,7 +552,7 @@
         border-right: none;
       }
 
-      .editor-area {
+      .main-area {
         position: fixed;
         top: 0;
         left: 0;
@@ -468,7 +563,7 @@
         transition: transform 0.28s cubic-bezier(0.25, 0.8, 0.25, 1);
       }
 
-      .app-container.mobile-editing .editor-area {
+      .app-container.mobile-detail-open .main-area {
         transform: translateX(0);
       }
 
@@ -476,12 +571,12 @@
         display: inline-flex;
       }
 
-      .editor-toolbar {
+      .top-toolbar {
         padding: 12px 16px;
       }
 
       .editor-content {
-        padding: 20px 20px;
+        padding: 20px;
       }
 
       .input-title {
@@ -490,6 +585,10 @@
 
       .editor-footer {
         padding: 10px 20px;
+      }
+
+      .tutorial-body {
+        padding: 20px 20px 36px;
       }
     }
   </style>
@@ -504,9 +603,12 @@
           <span class="app-title-icon">✎</span>
           <span>Mellow Note</span>
         </div>
-        <button class="btn-new" id="btnNewNote">
-          <span>＋</span> 新規メモ
-        </button>
+        <div class="header-actions">
+          <button class="btn-guide" id="btnOpenTutorial" title="使い方を見る">使い方</button>
+          <button class="btn-new" id="btnNewNote">
+            <span>＋</span> 新規
+          </button>
+        </div>
       </div>
 
       <div class="search-box">
@@ -521,23 +623,19 @@
 
       <div class="list-meta">
         <span id="noteCountLabel">すべてのメモ (0件)</span>
-        <span id="syncModeLabel">ローカル保存</span>
+        <span id="totalCharSummary">合計 0 文字</span>
       </div>
 
-      <div class="note-list" id="noteList">
-        <!-- メモカードがここに動的に生成されます -->
-      </div>
+      <div class="note-list" id="noteList"></div>
     </aside>
 
-    <!-- 右ペイン：エディタ -->
-    <main class="editor-area">
-      <!-- メモ選択時の表示 -->
-      <div id="editorWrapper" style="display: none; flex-direction: column; height: 100%;">
-        <header class="editor-toolbar">
+    <!-- 右ペイン：メモ編集 または チュートリアル -->
+    <main class="main-area">
+      <!-- 1. メモ編集画面 -->
+      <div id="editorView">
+        <header class="top-toolbar">
           <div class="toolbar-left">
-            <button class="btn-back" id="btnBack">
-              ← 一覧へ
-            </button>
+            <button class="btn-back btn-back-to-list">← 一覧へ</button>
             <div class="save-status">
               <span class="status-dot" id="statusDot"></span>
               <span id="saveStatusText">保存済み</span>
@@ -565,39 +663,98 @@
         </footer>
       </div>
 
-      <!-- メモ未選択時の表示 -->
-      <div class="no-note-selected" id="noNoteView">
+      <!-- 2. メモ未選択時の画面 -->
+      <div id="noNoteView">
         <div class="no-note-icon">☕</div>
-        <p>左の一覧からメモを選ぶか、<br>「＋ 新規メモ」から書き始めましょう。</p>
+        <p>左の一覧からメモを選ぶか、<br>「＋ 新規」から書き始めましょう。</p>
+        <button class="btn-guide" id="btnEmptyTutorial">メモ帳の使い方を見る</button>
       </div>
+
+      <!-- 3. チュートリアル画面（メモ帳の使い方のみ記載） -->
+      <section id="tutorialView" aria-label="メモ帳の使い方">
+        <header class="top-toolbar">
+          <div class="toolbar-left">
+            <button class="btn-back btn-back-to-list">← 一覧へ</button>
+            <strong>メモ帳の使い方</strong>
+          </div>
+          <div class="toolbar-right">
+            <button class="btn-icon" id="btnCloseTutorial">閉じる</button>
+          </div>
+        </header>
+
+        <div class="tutorial-body">
+          <div class="tutorial-hero">
+            <h1>Mellow Note の使い方</h1>
+            <p>
+              思いついたことや日々の記録を、落ち着いて書き残せるシンプルなメモ帳です。
+              特別な操作をしなくても、入力した内容は自動で保存されます。
+            </p>
+          </div>
+
+          <div class="guide-card">
+            <h2>1. メモを作る・書く</h2>
+            <p>
+              左上の「＋ 新規」ボタンを押すと新しいメモが作られます。
+              一番上の欄にタイトルを、広いスペースに本文を入力してください。
+              文字を入力すると自動で保存され、画面左上の表示が「保存済み」になります。
+            </p>
+          </div>
+
+          <div class="guide-card">
+            <h2>2. メモを探す</h2>
+            <p>
+              一覧の上にある検索ボックスにキーワードを入れると、タイトルや本文から該当するメモをすぐに絞り込めます。
+              検索欄を空にすると、すべてのメモが再び表示されます。
+            </p>
+          </div>
+
+          <div class="guide-card">
+            <h2>3. 大切なメモを上に固定する（ピン留め）</h2>
+            <p>
+              よく見るメモや忘れたくないメモを開いた状態で、右上の「📌 ピン留め」を押すと、一覧の一番上に固定されます。
+              もう一度押すと固定を解除できます。
+            </p>
+          </div>
+
+          <div class="guide-card">
+            <h2>4. メモを削除する</h2>
+            <p>
+              不要になったメモを開き、右上の「🗑 削除」を押すとメモを削除できます。
+              確認メッセージが出るので、間違いがなければ削除を実行してください。
+            </p>
+          </div>
+
+          <div class="guide-card">
+            <h2>5. スマホでの見方・切り替え</h2>
+            <p>
+              スマホでは一覧画面と編集画面が切り替わります。メモを開いたあとに一覧へ戻りたいときは、左上の「← 一覧へ」を押してください。
+            </p>
+          </div>
+
+          <div class="tutorial-actions">
+            <button class="btn-new" id="btnStartFromTutorial"><span>＋</span> 新しいメモを書いてみる</button>
+          </div>
+        </div>
+      </section>
     </main>
   </div>
 
   <script>
     /**
-     * =========================================================================
      * データ保存層（StorageService）
-     * -------------------------------------------------------------------------
-     * 【Firebase移行時のポイント】
-     * のちにFirebase (Cloud Firestore) へ移行する際は、この StorageService 内の
-     * 4つのメソッド（loadNotes, saveNote, deleteNote, subscribeNotes）を
-     * Firestoreの関数（getDocs, setDoc, deleteDoc, onSnapshot）に書き換えるだけで
-     * UI側のコードを変更せずにPC・スマホ間でリアルタイム同期できます。
-     * =========================================================================
+     * 将来Firestoreへ差し替える際は、このオブジェクトのメソッドを置き換えます。
      */
     const StorageService = {
       STORAGE_KEY: 'mellow_note_data_v1',
 
-      // 全メモを取得
       async loadNotes() {
         const raw = localStorage.getItem(this.STORAGE_KEY);
         if (!raw) {
-          // 初回起動時のサンプルメモ
           const initialNotes = [
             {
               id: 'welcome-note-1',
-              title: 'Mellow Noteへようこそ ☕',
-              body: 'ここは、日々のちょっとした気づきや大切なことを書き留めるシンプルなメモ帳です。\n\n・入力した内容は自動で保存されます\n・大切なメモは右上の「ピン留め」で一番上に固定できます\n・PCでもスマホでも見やすい画面サイズに自動調整されます\n\nのちにFirebaseと連携すると、PCとスマホで同じメモをリアルタイムに共有できるようになります。',
+              title: '最初のメモ ☕',
+              body: '気軽にメモを書いてみてください。\n左上の「使い方」から基本操作も確認できます。',
               isPinned: true,
               createdAt: Date.now(),
               updatedAt: Date.now()
@@ -609,7 +766,6 @@
         return JSON.parse(raw);
       },
 
-      // メモを保存（新規作成・更新共通）
       async saveNote(note) {
         const notes = await this.loadNotes();
         const index = notes.findIndex(n => n.id === note.id);
@@ -622,7 +778,6 @@
         return note;
       },
 
-      // メモを削除
       async deleteNote(noteId) {
         const notes = await this.loadNotes();
         const filtered = notes.filter(n => n.id !== noteId);
@@ -630,28 +785,29 @@
       }
     };
 
-    /**
-     * =========================================================================
-     * アプリケーション状態・UI制御
-     * =========================================================================
-     */
     const state = {
       notes: [],
       activeNoteId: null,
+      isTutorialOpen: false,
       searchQuery: '',
       saveTimer: null
     };
 
-    // DOM要素の取得
     const els = {
       appContainer: document.getElementById('appContainer'),
       noteList: document.getElementById('noteList'),
       noteCountLabel: document.getElementById('noteCountLabel'),
+      totalCharSummary: document.getElementById('totalCharSummary'),
       searchInput: document.getElementById('searchInput'),
       btnNewNote: document.getElementById('btnNewNote'),
-      editorWrapper: document.getElementById('editorWrapper'),
+      btnOpenTutorial: document.getElementById('btnOpenTutorial'),
+      btnEmptyTutorial: document.getElementById('btnEmptyTutorial'),
+      btnCloseTutorial: document.getElementById('btnCloseTutorial'),
+      btnStartFromTutorial: document.getElementById('btnStartFromTutorial'),
+      backButtons: document.querySelectorAll('.btn-back-to-list'),
+      editorView: document.getElementById('editorView'),
       noNoteView: document.getElementById('noNoteView'),
-      btnBack: document.getElementById('btnBack'),
+      tutorialView: document.getElementById('tutorialView'),
       statusDot: document.getElementById('statusDot'),
       saveStatusText: document.getElementById('saveStatusText'),
       btnPin: document.getElementById('btnPin'),
@@ -663,7 +819,6 @@
       charCount: document.getElementById('charCount')
     };
 
-    // 日時フォーマット（例: 2026/11/22 13:05）
     function formatDate(timestamp) {
       const d = new Date(timestamp);
       const y = d.getFullYear();
@@ -674,7 +829,6 @@
       return `${y}/${m}/${day} ${h}:${min}`;
     }
 
-    // メモの並び替え（ピン留め優先 ＞ 更新日時が新しい順）
     function sortNotes(notes) {
       return [...notes].sort((a, b) => {
         if (a.isPinned !== b.isPinned) {
@@ -684,7 +838,64 @@
       });
     }
 
-    // メモ一覧の描画
+    function escapeHtml(str) {
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function updateSummaryStats() {
+      const totalChars = state.notes.reduce((sum, n) => sum + (n.body ? n.body.length : 0), 0);
+      els.totalCharSummary.textContent = `合計 ${totalChars.toLocaleString()} 文字`;
+    }
+
+    function updateRightPaneVisibility() {
+      els.btnOpenTutorial.classList.toggle('active', state.isTutorialOpen);
+
+      if (state.isTutorialOpen) {
+        els.editorView.style.display = 'none';
+        els.noNoteView.style.display = 'none';
+        els.tutorialView.style.display = 'flex';
+        return;
+      }
+
+      els.tutorialView.style.display = 'none';
+      const note = state.notes.find(n => n.id === state.activeNoteId);
+
+      if (note) {
+        els.noNoteView.style.display = 'none';
+        els.editorView.style.display = 'flex';
+        els.inputTitle.value = note.title;
+        els.inputBody.value = note.body;
+        els.editorDateInfo.textContent = `最終更新: ${formatDate(note.updatedAt)}`;
+        updateCharCount(note.body);
+        updatePinButton(note.isPinned);
+        setSaveStatus('saved');
+      } else {
+        els.editorView.style.display = 'none';
+        els.noNoteView.style.display = 'flex';
+      }
+    }
+
+    function openTutorial() {
+      state.isTutorialOpen = true;
+      state.activeNoteId = null;
+      renderNoteList();
+      updateRightPaneVisibility();
+      els.appContainer.classList.add('mobile-detail-open');
+    }
+
+    function closeTutorial() {
+      state.isTutorialOpen = false;
+      updateRightPaneVisibility();
+      if (window.innerWidth <= 768) {
+        els.appContainer.classList.remove('mobile-detail-open');
+      }
+    }
+
     function renderNoteList() {
       const query = state.searchQuery.trim().toLowerCase();
       const sorted = sortNotes(state.notes);
@@ -699,12 +910,13 @@
         ? `検索結果 (${filtered.length}件)`
         : `すべてのメモ (${state.notes.length}件)`;
 
+      updateSummaryStats();
       els.noteList.innerHTML = '';
 
       if (filtered.length === 0) {
         els.noteList.innerHTML = `
           <div class="empty-list">
-            ${query ? '一致するメモが見つかりませんでした。' : 'メモがまだありません。<br>右上の「＋ 新規メモ」から作成できます。'}
+            ${query ? '一致するメモが見つかりませんでした。' : 'メモがまだありません。<br>右上の「＋ 新規」から作成できます。'}
           </div>
         `;
         return;
@@ -712,8 +924,8 @@
 
       filtered.forEach(note => {
         const card = document.createElement('div');
-        card.className = `note-card ${note.id === state.activeNoteId ? 'active' : ''}`;
-        
+        card.className = `note-card ${!state.isTutorialOpen && note.id === state.activeNoteId ? 'active' : ''}`;
+
         const displayTitle = note.title.trim() || '無題のメモ';
         const displayPreview = note.body.trim().replace(/\n/g, ' ') || '本文なし';
 
@@ -726,51 +938,22 @@
           <div class="note-card-date">${formatDate(note.updatedAt)}</div>
         `;
 
-        card.addEventListener('click', () => selectNote(note.id));
+        card.addEventListener('click', () => selectNote(note.id, true));
         els.noteList.appendChild(card);
       });
     }
 
-    // HTMLエスケープ（XSS対策）
-    function escapeHtml(str) {
-      return str
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
-    }
-
-    // メモを選択してエディタに表示
     function selectNote(noteId, isMobileOpen = true) {
+      state.isTutorialOpen = false;
       state.activeNoteId = noteId;
-      const note = state.notes.find(n => n.id === noteId);
-
-      if (!note) {
-        els.editorWrapper.style.display = 'none';
-        els.noNoteView.style.display = 'flex';
-        renderNoteList();
-        return;
-      }
-
-      els.noNoteView.style.display = 'none';
-      els.editorWrapper.style.display = 'flex';
-
-      els.inputTitle.value = note.title;
-      els.inputBody.value = note.body;
-      els.editorDateInfo.textContent = `最終更新: ${formatDate(note.updatedAt)}`;
-      updateCharCount(note.body);
-      updatePinButton(note.isPinned);
-      setSaveStatus('saved');
-
       renderNoteList();
+      updateRightPaneVisibility();
 
-      if (isMobileOpen) {
-        els.appContainer.classList.add('mobile-editing');
+      if (isMobileOpen && noteId) {
+        els.appContainer.classList.add('mobile-detail-open');
       }
     }
 
-    // ピン留めボタンの表示更新
     function updatePinButton(isPinned) {
       if (isPinned) {
         els.btnPin.classList.add('pinned');
@@ -781,13 +964,10 @@
       }
     }
 
-    // 文字数カウント更新
     function updateCharCount(text) {
-      const count = text.length;
-      els.charCount.textContent = `${count.toLocaleString()} 文字`;
+      els.charCount.textContent = `${text.length.toLocaleString()} 文字`;
     }
 
-    // 保存ステータス表示
     function setSaveStatus(status) {
       if (status === 'saving') {
         els.statusDot.classList.add('saving');
@@ -798,7 +978,6 @@
       }
     }
 
-    // 新規メモ作成
     async function createNewNote() {
       const now = Date.now();
       const newNote = {
@@ -816,7 +995,6 @@
       els.inputTitle.focus();
     }
 
-    // 現在のメモを自動保存（デバウンス処理）
     function handleEditorInput() {
       const note = state.notes.find(n => n.id === state.activeNoteId);
       if (!note) return;
@@ -837,7 +1015,6 @@
       }, 400);
     }
 
-    // ピン留め切り替え
     async function togglePin() {
       const note = state.notes.find(n => n.id === state.activeNoteId);
       if (!note) return;
@@ -850,7 +1027,6 @@
       renderNoteList();
     }
 
-    // メモ削除
     async function deleteCurrentNote() {
       const note = state.notes.find(n => n.id === state.activeNoteId);
       if (!note) return;
@@ -864,13 +1040,18 @@
       state.notes = state.notes.filter(n => n.id !== note.id);
       state.activeNoteId = null;
 
-      els.appContainer.classList.remove('mobile-editing');
-      selectNote(null, false);
+      els.appContainer.classList.remove('mobile-detail-open');
+      renderNoteList();
+      updateRightPaneVisibility();
     }
 
-    // イベントリスナー登録
     function bindEvents() {
       els.btnNewNote.addEventListener('click', createNewNote);
+      els.btnOpenTutorial.addEventListener('click', openTutorial);
+      els.btnEmptyTutorial.addEventListener('click', openTutorial);
+      els.btnCloseTutorial.addEventListener('click', closeTutorial);
+      els.btnStartFromTutorial.addEventListener('click', createNewNote);
+
       els.inputTitle.addEventListener('input', handleEditorInput);
       els.inputBody.addEventListener('input', handleEditorInput);
       els.btnPin.addEventListener('click', togglePin);
@@ -881,24 +1062,27 @@
         renderNoteList();
       });
 
-      // スマホ画面で一覧へ戻る
-      els.btnBack.addEventListener('click', () => {
-        els.appContainer.classList.remove('mobile-editing');
-        state.activeNoteId = null;
-        renderNoteList();
+      els.backButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          els.appContainer.classList.remove('mobile-detail-open');
+          state.isTutorialOpen = false;
+          state.activeNoteId = null;
+          renderNoteList();
+          updateRightPaneVisibility();
+        });
       });
     }
 
-    // 初期化処理
     async function init() {
       bindEvents();
       state.notes = await StorageService.loadNotes();
       renderNoteList();
 
-      // PC画面幅の場合は最初のメモを自動で開く
       if (window.innerWidth > 768 && state.notes.length > 0) {
         const sorted = sortNotes(state.notes);
         selectNote(sorted[0].id, false);
+      } else {
+        updateRightPaneVisibility();
       }
     }
 

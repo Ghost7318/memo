@@ -2,8 +2,9 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Mellow Note">
   <meta name="theme-color" content="#FAF8F5">
@@ -24,11 +25,9 @@
         canvas.height = size;
         const ctx = canvas.getContext("2d");
 
-        // 落ち着いたラテアイボリーの背景
         ctx.fillStyle = "#F4EAE1";
         ctx.fillRect(0, 0, size, size);
 
-        // 内側にやわらかい枠線
         const inset = Math.round(size * 0.06);
         const radius = Math.round(size * 0.22);
         const w = size - inset * 2;
@@ -47,7 +46,6 @@
         ctx.strokeStyle = "#E6DFD5";
         ctx.stroke();
 
-        // 中央に鉛筆の絵文字（✏️）を描画
         ctx.font = `${Math.round(size * 0.56)}px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif`;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
@@ -66,7 +64,8 @@
         const manifestData = {
           name: "Mellow Note",
           short_name: "Mellow Note",
-          start_url: ".",
+          // blob の manifest では "." が正しく解決されないため、現在のURLを明示
+          start_url: location.href.split("#")[0],
           display: "standalone",
           background_color: "#FAF8F5",
           theme_color: "#FAF8F5",
@@ -86,14 +85,12 @@
     })();
   </script>
 
-  <!-- 落ち着いた丸みのあるGoogleフォント -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700&family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
 
   <style>
     :root {
-      /* 落ち着きのあるラテ＆アイボリー配色 */
       --bg-main: #FAF8F5;
       --bg-sidebar: #F3EFEA;
       --bg-card: #FFFFFF;
@@ -105,7 +102,9 @@
       --accent-hover: #B88B68;
       --accent-soft: #F4EAE1;
       --danger: #D97A7A;
+      --danger-strong: #C45F5F;
       --danger-soft: #FAEBEB;
+      --ok: #98B898;
       --border: #E6DFD5;
       --radius-lg: 16px;
       --radius-md: 12px;
@@ -129,7 +128,9 @@
       justify-content: center;
     }
 
-    /* ログイン画面 */
+    button { font-family: inherit; }
+
+    /* ================= ログイン画面 ================= */
     .login-screen {
       width: 100%;
       height: 100%;
@@ -164,11 +165,7 @@
       font-size: 1.7rem;
     }
 
-    .login-card h1 {
-      font-size: 1.45rem;
-      margin-bottom: 10px;
-      color: var(--text-main);
-    }
+    .login-card h1 { font-size: 1.45rem; margin-bottom: 10px; }
 
     .login-card p {
       font-size: 0.92rem;
@@ -184,30 +181,25 @@
       border: none;
       border-radius: var(--radius-md);
       padding: 13px 18px;
-      font-family: inherit;
       font-size: 0.98rem;
       font-weight: 700;
       cursor: pointer;
       box-shadow: 0 3px 10px rgba(200, 157, 124, 0.3);
       transition: background-color 0.2s, transform 0.1s;
     }
-
-    .btn-google:hover {
-      background-color: var(--accent-hover);
-    }
-
-    .btn-google:active {
-      transform: scale(0.98);
-    }
+    .btn-google:hover { background-color: var(--accent-hover); }
+    .btn-google:active { transform: scale(0.98); }
+    .btn-google:disabled { opacity: 0.6; cursor: default; }
 
     .login-error {
       margin-top: 14px;
       font-size: 0.84rem;
       color: var(--danger);
       min-height: 1.2em;
+      line-height: 1.6;
     }
 
-    /* アプリ全体のコンテナ */
+    /* ================= アプリ全体 ================= */
     .app-container {
       width: 100%;
       max-width: 1200px;
@@ -216,12 +208,9 @@
       background-color: var(--bg-main);
       box-shadow: 0 0 30px rgba(74, 66, 56, 0.04);
     }
+    .app-container.authenticated { display: flex; }
 
-    .app-container.authenticated {
-      display: flex;
-    }
-
-    /* ================= サイドバー（メモ一覧） ================= */
+    /* ================= サイドバー ================= */
     .sidebar {
       width: 340px;
       background-color: var(--bg-sidebar);
@@ -233,7 +222,7 @@
     }
 
     .sidebar-header {
-      padding: 20px 20px 10px;
+      padding: 20px 20px 12px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -243,7 +232,6 @@
     .app-title {
       font-size: 1.2rem;
       font-weight: 700;
-      color: var(--text-main);
       display: flex;
       align-items: center;
       gap: 8px;
@@ -262,41 +250,13 @@
       font-size: 1.05rem;
     }
 
-    .header-actions {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .btn-guide {
-      background-color: var(--bg-card);
-      color: var(--text-muted);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      padding: 8px 10px;
-      font-family: inherit;
-      font-size: 0.8rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .btn-guide:hover,
-    .btn-guide.active {
-      background-color: var(--accent-soft);
-      border-color: var(--accent);
-      color: var(--text-main);
-      font-weight: 700;
-    }
-
     .btn-new {
       background-color: var(--accent);
       color: #FFFFFF;
       border: none;
       border-radius: var(--radius-md);
-      padding: 8px 12px;
-      font-family: inherit;
-      font-size: 0.85rem;
+      padding: 8px 14px;
+      font-size: 0.88rem;
       font-weight: 700;
       cursor: pointer;
       display: flex;
@@ -305,16 +265,40 @@
       box-shadow: 0 2px 6px rgba(200, 157, 124, 0.3);
       transition: background-color 0.2s, transform 0.1s;
     }
+    .btn-new:hover { background-color: var(--accent-hover); }
+    .btn-new:active { transform: scale(0.97); }
 
-    .btn-new:hover {
-      background-color: var(--accent-hover);
+    /* 小さなボタン（チップ） */
+    .btn-chip {
+      background-color: var(--bg-card);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 7px 10px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
     }
-
-    .btn-new:active {
-      transform: scale(0.97);
+    .btn-chip:hover,
+    .btn-chip.active {
+      background-color: var(--accent-soft);
+      border-color: var(--accent);
+      color: var(--text-main);
+      font-weight: 700;
     }
+    .btn-chip.danger { color: var(--danger-strong); border-color: var(--danger); }
+    .btn-chip.danger:hover { background-color: var(--danger-soft); }
+    .btn-chip:disabled { opacity: 0.45; cursor: default; pointer-events: none; }
 
-    /* ログイン中アカウントバー */
+    .sub-actions {
+      display: flex;
+      gap: 6px;
+      padding: 0 20px 12px;
+    }
+    .sub-actions .btn-chip { flex: 1; }
+
     .user-bar {
       margin: 0 20px 12px;
       padding: 8px 12px;
@@ -341,27 +325,16 @@
       background: transparent;
       border: none;
       color: var(--text-muted);
-      font-family: inherit;
       font-size: 0.76rem;
       cursor: pointer;
       flex-shrink: 0;
       text-decoration: underline;
     }
+    .btn-logout:hover { color: var(--text-main); }
 
-    .btn-logout:hover {
-      color: var(--text-main);
-    }
+    .search-box { padding: 0 20px 12px; }
 
-    /* 検索ボックス */
-    .search-box {
-      padding: 0 20px 14px;
-    }
-
-    .search-input-wrap {
-      position: relative;
-      display: flex;
-      align-items: center;
-    }
+    .search-input-wrap { position: relative; display: flex; align-items: center; }
 
     .search-icon {
       position: absolute;
@@ -377,22 +350,14 @@
       border: 1px solid var(--border);
       border-radius: var(--radius-md);
       font-family: inherit;
-      font-size: 0.9rem;
+      font-size: 16px; /* iOSで入力時に拡大されないよう16px */
       color: var(--text-main);
       outline: none;
       transition: border-color 0.2s, box-shadow 0.2s;
     }
+    .search-input::placeholder { color: var(--text-light); }
+    .search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
 
-    .search-input::placeholder {
-      color: var(--text-light);
-    }
-
-    .search-input:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px var(--accent-soft);
-    }
-
-    /* 件数表示バー */
     .list-meta {
       padding: 0 22px 8px;
       font-size: 0.78rem;
@@ -402,24 +367,31 @@
       align-items: center;
     }
 
-    /* メモリスト */
+    /* 選択モードのバー */
+    .select-bar {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      margin: 0 16px 8px;
+      padding: 8px 10px;
+      background-color: var(--accent-soft);
+      border: 1px solid var(--accent);
+      border-radius: var(--radius-md);
+      font-size: 0.8rem;
+    }
+    .select-bar.visible { display: flex; }
+    .select-bar .select-count { flex: 1; text-align: center; color: var(--text-main); font-weight: 700; white-space: nowrap; }
+
     .note-list {
       flex: 1;
       overflow-y: auto;
-      padding: 4px 16px 24px;
+      padding: 4px 16px 16px;
       display: flex;
       flex-direction: column;
       gap: 10px;
     }
-
-    .note-list::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    .note-list::-webkit-scrollbar-thumb {
-      background-color: var(--border);
-      border-radius: 3px;
-    }
+    .note-list::-webkit-scrollbar { width: 6px; }
+    .note-list::-webkit-scrollbar-thumb { background-color: var(--border); border-radius: 3px; }
 
     .note-card {
       background-color: var(--bg-card);
@@ -429,18 +401,34 @@
       cursor: pointer;
       transition: all 0.2s ease;
       box-shadow: 0 2px 5px rgba(74, 66, 56, 0.02);
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      flex-shrink: 0;
     }
+    .note-card:hover { background-color: #FCFBF9; border-color: var(--border); transform: translateY(-1px); }
+    .note-card.active { background-color: var(--accent-soft); border-color: var(--accent); }
+    .note-card.selected { background-color: var(--accent-soft); border-color: var(--accent); }
 
-    .note-card:hover {
-      background-color: #FCFBF9;
-      border-color: var(--border);
-      transform: translateY(-1px);
-    }
+    .note-card-main { flex: 1; min-width: 0; }
 
-    .note-card.active {
-      background-color: var(--accent-soft);
-      border-color: var(--accent);
+    .check {
+      width: 22px;
+      height: 22px;
+      border-radius: 7px;
+      border: 2px solid var(--border);
+      background-color: var(--bg-card);
+      color: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 1px;
+      transition: all 0.15s;
     }
+    .check.on { background-color: var(--accent); border-color: var(--accent); color: #fff; }
 
     .note-card-header {
       display: flex;
@@ -453,17 +441,12 @@
     .note-card-title {
       font-size: 0.98rem;
       font-weight: 700;
-      color: var(--text-main);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
 
-    .pin-badge {
-      color: var(--accent);
-      font-size: 0.85rem;
-      flex-shrink: 0;
-    }
+    .pin-badge { color: var(--accent); font-size: 0.85rem; flex-shrink: 0; }
 
     .note-card-preview {
       font-size: 0.83rem;
@@ -475,10 +458,7 @@
       min-height: 1.2em;
     }
 
-    .note-card-date {
-      font-size: 0.72rem;
-      color: var(--text-light);
-    }
+    .note-card-date { font-size: 0.72rem; color: var(--text-light); }
 
     .empty-list {
       text-align: center;
@@ -488,7 +468,36 @@
       line-height: 1.7;
     }
 
-    /* ================= メイン（エディタ / チュートリアル） ================= */
+    /* サイドバー下部の容量ミニ表示 */
+    .sidebar-storage {
+      padding: 10px 20px calc(12px + env(safe-area-inset-bottom));
+      border-top: 1px solid var(--border);
+      background-color: var(--bg-sidebar);
+      cursor: pointer;
+      font-size: 0.74rem;
+      color: var(--text-muted);
+    }
+    .sidebar-storage:hover { background-color: var(--bg-hover); }
+    .sidebar-storage .row { display: flex; justify-content: space-between; margin-bottom: 6px; gap: 8px; }
+
+    .meter {
+      width: 100%;
+      height: 7px;
+      background-color: var(--bg-hover);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .meter-fill {
+      height: 100%;
+      width: 0%;
+      background-color: var(--accent);
+      border-radius: 4px;
+      transition: width 0.3s;
+    }
+    .meter-fill.warn { background-color: #D9A441; }
+    .meter-fill.full { background-color: var(--danger); }
+
+    /* ================= メイン ================= */
     .main-area {
       flex: 1;
       display: flex;
@@ -497,23 +506,21 @@
       height: 100%;
       position: relative;
       overflow: hidden;
+      min-width: 0;
     }
 
     .top-toolbar {
-      padding: 16px 28px;
+      padding: 14px 28px;
       border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 12px;
       background-color: var(--bg-main);
+      flex-shrink: 0;
     }
 
-    .toolbar-left {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
+    .toolbar-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
 
     .btn-back {
       display: none;
@@ -522,12 +529,12 @@
       color: var(--text-main);
       border-radius: var(--radius-sm);
       padding: 6px 12px;
-      font-family: inherit;
       font-size: 0.85rem;
       font-weight: 500;
       cursor: pointer;
       align-items: center;
       gap: 4px;
+      white-space: nowrap;
     }
 
     .save-status {
@@ -536,29 +543,22 @@
       display: flex;
       align-items: center;
       gap: 6px;
+      min-width: 0;
     }
+    .save-status span:last-child { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
     .status-dot {
       width: 7px;
       height: 7px;
       border-radius: 50%;
-      background-color: #98B898;
+      background-color: var(--ok);
       transition: background-color 0.3s;
+      flex-shrink: 0;
     }
+    .status-dot.saving { background-color: var(--accent); }
+    .status-dot.error { background-color: var(--danger); }
 
-    .status-dot.saving {
-      background-color: var(--accent);
-    }
-
-    .status-dot.error {
-      background-color: var(--danger);
-    }
-
-    .toolbar-right {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
+    .toolbar-right { display: flex; align-items: center; gap: 8px; }
 
     .btn-icon {
       background-color: var(--bg-card);
@@ -566,39 +566,21 @@
       color: var(--text-muted);
       border-radius: var(--radius-sm);
       padding: 7px 12px;
-      font-family: inherit;
       font-size: 0.82rem;
       cursor: pointer;
       display: flex;
       align-items: center;
       gap: 5px;
       transition: all 0.2s;
+      white-space: nowrap;
     }
+    .btn-icon:hover { background-color: var(--bg-hover); color: var(--text-main); }
+    .btn-icon.pinned { background-color: var(--accent-soft); border-color: var(--accent); color: var(--accent); font-weight: 700; }
+    .btn-icon.delete:hover { background-color: var(--danger-soft); border-color: var(--danger); color: var(--danger); }
+    .btn-icon:disabled { opacity: 0.5; cursor: default; }
 
-    .btn-icon:hover {
-      background-color: var(--bg-hover);
-      color: var(--text-main);
-    }
-
-    .btn-icon.pinned {
-      background-color: var(--accent-soft);
-      border-color: var(--accent);
-      color: var(--accent);
-      font-weight: 700;
-    }
-
-    .btn-icon.delete:hover {
-      background-color: var(--danger-soft);
-      border-color: var(--danger);
-      color: var(--danger);
-    }
-
-    /* エディタ入力画面 */
-    #editorView {
-      display: none;
-      flex-direction: column;
-      height: 100%;
-    }
+    /* エディタ */
+    #editorView { display: none; flex-direction: column; height: 100%; }
 
     .editor-content {
       flex: 1;
@@ -611,11 +593,7 @@
       overflow-y: auto;
     }
 
-    .editor-date-info {
-      font-size: 0.8rem;
-      color: var(--text-light);
-      margin-bottom: 12px;
-    }
+    .editor-date-info { font-size: 0.8rem; color: var(--text-light); margin-bottom: 12px; }
 
     .input-title {
       width: 100%;
@@ -629,14 +607,12 @@
       margin-bottom: 18px;
       line-height: 1.4;
     }
-
-    .input-title::placeholder {
-      color: var(--text-light);
-    }
+    .input-title::placeholder { color: var(--text-light); }
 
     .input-body {
       flex: 1;
       width: 100%;
+      min-height: 200px;
       border: none;
       background: transparent;
       font-family: inherit;
@@ -647,21 +623,18 @@
       line-height: 1.85;
       letter-spacing: 0.02em;
     }
-
-    .input-body::placeholder {
-      color: var(--text-light);
-    }
+    .input-body::placeholder { color: var(--text-light); }
 
     .editor-footer {
-      padding: 12px 36px;
+      padding: 12px 36px calc(12px + env(safe-area-inset-bottom));
       border-top: 1px solid var(--border);
       display: flex;
-      justify-content: flex-end;
+      justify-content: space-between;
       font-size: 0.78rem;
       color: var(--text-muted);
+      flex-shrink: 0;
     }
 
-    /* メモ未選択画面 */
     #noNoteView {
       flex: 1;
       display: flex;
@@ -672,6 +645,7 @@
       gap: 14px;
       padding: 20px;
       text-align: center;
+      line-height: 1.7;
     }
 
     .no-note-icon {
@@ -686,19 +660,21 @@
       color: var(--accent);
     }
 
-    /* ================= チュートリアル画面（メモ帳の使い方のみ） ================= */
-    #tutorialView {
+    /* ================= 使い方 / 設定（共通） ================= */
+    #tutorialView, #settingsView {
       display: none;
       flex-direction: column;
       height: 100%;
-      overflow-y: auto;
+      overflow: hidden;
     }
+
+    .panel-scroll { flex: 1; overflow-y: auto; }
 
     .tutorial-body {
       max-width: 760px;
       width: 100%;
       margin: 0 auto;
-      padding: 32px 36px 48px;
+      padding: 32px 36px calc(48px + env(safe-area-inset-bottom));
       display: flex;
       flex-direction: column;
       gap: 20px;
@@ -710,18 +686,8 @@
       border-radius: var(--radius-lg);
       padding: 24px;
     }
-
-    .tutorial-hero h1 {
-      font-size: 1.4rem;
-      margin-bottom: 8px;
-      color: var(--text-main);
-    }
-
-    .tutorial-hero p {
-      font-size: 0.95rem;
-      line-height: 1.75;
-      color: var(--text-muted);
-    }
+    .tutorial-hero h1 { font-size: 1.4rem; margin-bottom: 8px; }
+    .tutorial-hero p { font-size: 0.95rem; line-height: 1.75; color: var(--text-muted); }
 
     .guide-card {
       background-color: var(--bg-card);
@@ -729,34 +695,134 @@
       border-radius: var(--radius-md);
       padding: 20px 22px;
     }
+    .guide-card h2 { font-size: 1.05rem; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+    .guide-card p { font-size: 0.92rem; line-height: 1.8; color: var(--text-muted); }
+    .guide-card p + p { margin-top: 8px; }
+    .guide-card .small { font-size: 0.8rem; color: var(--text-light); line-height: 1.7; }
 
-    .guide-card h2 {
-      font-size: 1.05rem;
-      margin-bottom: 8px;
-      color: var(--text-main);
-      display: flex;
+    .guide-card.danger-zone { border-color: var(--danger); background-color: #FFFAFA; }
+    .guide-card.danger-zone h2 { color: var(--danger-strong); }
+
+    .tutorial-actions { display: flex; justify-content: flex-start; padding-top: 4px; }
+
+    .quota-big { font-size: 1.5rem; font-weight: 700; margin: 4px 0 2px; }
+    .quota-sub { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 10px; }
+    .meter.large { height: 12px; border-radius: 6px; margin: 8px 0 6px; }
+    .meter.large .meter-fill { border-radius: 6px; }
+
+    .quota-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+      font-size: 0.84rem;
+    }
+    .quota-table td { padding: 7px 4px; border-top: 1px solid var(--border); color: var(--text-muted); vertical-align: top; }
+    .quota-table td:last-child { text-align: right; color: var(--text-main); font-weight: 500; white-space: nowrap; padding-left: 10px; }
+
+    .btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+
+    .btn-danger {
+      background-color: var(--danger-strong);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-md);
+      padding: 10px 16px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background-color 0.2s, transform 0.1s;
+    }
+    .btn-danger:hover { background-color: #B35252; }
+    .btn-danger:active { transform: scale(0.98); }
+    .btn-danger:disabled { opacity: 0.45; cursor: default; }
+
+    .btn-outline-danger {
+      background-color: transparent;
+      color: var(--danger-strong);
+      border: 1px solid var(--danger);
+      border-radius: var(--radius-md);
+      padding: 10px 16px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .btn-outline-danger:hover { background-color: var(--danger-soft); }
+
+    /* ================= モーダル / トースト ================= */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background-color: rgba(74, 66, 56, 0.4);
+      display: none;
       align-items: center;
-      gap: 8px;
+      justify-content: center;
+      padding: 20px;
+      z-index: 100;
     }
+    .modal-backdrop.open { display: flex; }
 
-    .guide-card p {
-      font-size: 0.92rem;
-      line-height: 1.8;
-      color: var(--text-muted);
+    .modal {
+      width: 100%;
+      max-width: 420px;
+      background-color: var(--bg-card);
+      border-radius: var(--radius-lg);
+      padding: 24px 22px 20px;
+      box-shadow: 0 16px 40px rgba(74, 66, 56, 0.2);
+      max-height: 90dvh;
+      overflow-y: auto;
     }
-
-    .tutorial-actions {
-      display: flex;
-      justify-content: flex-start;
-      padding-top: 4px;
+    .modal h3 { font-size: 1.1rem; margin-bottom: 10px; }
+    .modal-message { font-size: 0.9rem; line-height: 1.75; color: var(--text-muted); white-space: pre-line; }
+    .modal-input {
+      width: 100%;
+      margin-top: 14px;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      font-family: inherit;
+      font-size: 16px;
+      color: var(--text-main);
+      outline: none;
+      display: none;
     }
+    .modal-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+    .modal-error { margin-top: 12px; font-size: 0.82rem; color: var(--danger-strong); line-height: 1.6; min-height: 1.2em; white-space: pre-line; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
+    .btn-primary {
+      background-color: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-md);
+      padding: 10px 16px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .btn-primary:hover { background-color: var(--accent-hover); }
+    .btn-primary:disabled { opacity: 0.45; cursor: default; }
 
-    /* ================= スマホ向けレスポンシブ設定 ================= */
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: calc(28px + env(safe-area-inset-bottom));
+      transform: translate(-50%, 20px);
+      background-color: var(--text-main);
+      color: #fff;
+      padding: 10px 18px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s, transform 0.25s;
+      z-index: 110;
+      max-width: calc(100% - 40px);
+      text-align: center;
+    }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+    /* ================= スマホ ================= */
     @media (max-width: 768px) {
-      .sidebar {
-        width: 100%;
-        border-right: none;
-      }
+      .sidebar { width: 100%; border-right: none; }
 
       .main-area {
         position: fixed;
@@ -768,34 +834,17 @@
         transform: translateX(100%);
         transition: transform 0.28s cubic-bezier(0.25, 0.8, 0.25, 1);
       }
+      .app-container.mobile-detail-open .main-area { transform: translateX(0); }
 
-      .app-container.mobile-detail-open .main-area {
-        transform: translateX(0);
-      }
-
-      .btn-back {
-        display: inline-flex;
-      }
-
-      .top-toolbar {
-        padding: 12px 16px;
-      }
-
-      .editor-content {
-        padding: 20px;
-      }
-
-      .input-title {
-        font-size: 1.35rem;
-      }
-
-      .editor-footer {
-        padding: 10px 20px;
-      }
-
-      .tutorial-body {
-        padding: 20px 20px 36px;
-      }
+      .btn-back { display: inline-flex; }
+      .top-toolbar { padding: 12px 14px; }
+      .toolbar-right { gap: 6px; }
+      .btn-icon { padding: 8px 10px; }
+      .btn-label { display: none; }
+      .editor-content { padding: 20px; }
+      .input-title { font-size: 1.35rem; }
+      .editor-footer { padding: 10px 20px calc(10px + env(safe-area-inset-bottom)); }
+      .tutorial-body { padding: 20px 20px calc(36px + env(safe-area-inset-bottom)); }
     }
   </style>
 </head>
@@ -815,7 +864,7 @@
     </div>
   </div>
 
-  <!-- メインアプリ画面（ログイン後に表示） -->
+  <!-- メインアプリ画面 -->
   <div class="app-container" id="appContainer">
     <!-- 左ペイン：メモ一覧 -->
     <aside class="sidebar">
@@ -824,12 +873,13 @@
           <span class="app-title-icon">✏️</span>
           <span>Mellow Note</span>
         </div>
-        <div class="header-actions">
-          <button class="btn-guide" id="btnOpenTutorial" title="使い方を見る">使い方</button>
-          <button class="btn-new" id="btnNewNote">
-            <span>＋</span> 新規
-          </button>
-        </div>
+        <button class="btn-new" id="btnNewNote"><span>＋</span> 新規</button>
+      </div>
+
+      <div class="sub-actions">
+        <button class="btn-chip" id="btnOpenTutorial">使い方</button>
+        <button class="btn-chip" id="btnOpenSettings">⚙ 設定</button>
+        <button class="btn-chip" id="btnToggleSelect">☑ 選択</button>
       </div>
 
       <div class="user-bar">
@@ -852,12 +902,27 @@
         <span id="totalCharSummary">合計 0 文字</span>
       </div>
 
+      <div class="select-bar" id="selectBar">
+        <button class="btn-chip" id="btnSelectAll">すべて選択</button>
+        <span class="select-count" id="selectedCount">0件選択中</span>
+        <button class="btn-chip danger" id="btnDeleteSelected" disabled>🗑 削除</button>
+        <button class="btn-chip" id="btnCancelSelect">完了</button>
+      </div>
+
       <div class="note-list" id="noteList"></div>
+
+      <div class="sidebar-storage" id="sidebarStorage" title="設定でストレージの詳細を見る">
+        <div class="row">
+          <span>ストレージ使用量（目安）</span>
+          <span id="miniStorageText">0 B / 0 B</span>
+        </div>
+        <div class="meter"><div class="meter-fill" id="miniMeterFill"></div></div>
+      </div>
     </aside>
 
-    <!-- 右ペイン：メモ編集 または チュートリアル -->
+    <!-- 右ペイン -->
     <main class="main-area">
-      <!-- 1. メモ編集画面 -->
+      <!-- 1. メモ編集 -->
       <div id="editorView">
         <header class="top-toolbar">
           <div class="toolbar-left">
@@ -869,34 +934,38 @@
           </div>
 
           <div class="toolbar-right">
+            <button class="btn-icon" id="btnCopy" title="タイトルと本文をコピー">
+              📋 <span class="btn-label">コピー</span>
+            </button>
             <button class="btn-icon" id="btnPin" title="上部に固定">
-              📌 <span id="pinBtnText">ピン留め</span>
+              📌 <span class="btn-label" id="pinBtnText">ピン留め</span>
             </button>
             <button class="btn-icon delete" id="btnDelete" title="このメモを削除">
-              🗑 削除
+              🗑 <span class="btn-label">削除</span>
             </button>
           </div>
         </header>
 
         <div class="editor-content">
           <div class="editor-date-info" id="editorDateInfo"></div>
-          <input type="text" class="input-title" id="inputTitle" placeholder="タイトルを入力...">
-          <textarea class="input-body" id="inputBody" placeholder="ここに自由に書き留めましょう..."></textarea>
+          <input type="text" class="input-title" id="inputTitle" placeholder="タイトルを入力..." maxlength="200">
+          <textarea class="input-body" id="inputBody" placeholder="ここに自由に書き留めましょう..." maxlength="100000"></textarea>
         </div>
 
         <footer class="editor-footer">
+          <span id="charLimitNote"></span>
           <span id="charCount">0 文字</span>
         </footer>
       </div>
 
-      <!-- 2. メモ未選択時の画面 -->
+      <!-- 2. 未選択 -->
       <div id="noNoteView">
         <div class="no-note-icon">☕</div>
-        <p>左の一覧からメモを選ぶか、<br>「＋ 新規」から書き始めましょう。</p>
-        <button class="btn-guide" id="btnEmptyTutorial">メモ帳の使い方を見る</button>
+        <p id="noNoteText">左の一覧からメモを選ぶか、<br>「＋ 新規」から書き始めましょう。</p>
+        <button class="btn-chip" id="btnEmptyTutorial">メモ帳の使い方を見る</button>
       </div>
 
-      <!-- 3. チュートリアル画面（メモ帳の使い方のみ記載） -->
+      <!-- 3. 使い方 -->
       <section id="tutorialView" aria-label="メモ帳の使い方">
         <header class="top-toolbar">
           <div class="toolbar-left">
@@ -908,62 +977,162 @@
           </div>
         </header>
 
-        <div class="tutorial-body">
-          <div class="tutorial-hero">
-            <h1>Mellow Note の使い方</h1>
-            <p>
-              思いついたことや日々の記録を、落ち着いて書き残せるシンプルなメモ帳です。
-              特別な操作をしなくても、入力した内容は自動で保存されます。
-            </p>
-          </div>
+        <div class="panel-scroll">
+          <div class="tutorial-body">
+            <div class="tutorial-hero">
+              <h1>Mellow Note の使い方</h1>
+              <p>
+                思いついたことや日々の記録を、落ち着いて書き残せるシンプルなメモ帳です。
+                入力した内容は自動で保存され、同じGoogleアカウントならどの端末でも同期されます。
+              </p>
+            </div>
 
-          <div class="guide-card">
-            <h2>1. メモを作る・書く</h2>
-            <p>
-              左上の「＋ 新規」ボタンを押すと新しいメモが作られます。
-              一番上の欄にタイトルを、広いスペースに本文を入力してください。
-              文字を入力すると自動で保存され、画面左上の表示が「同期済み」になります。
-            </p>
-          </div>
+            <div class="guide-card">
+              <h2>1. メモを作る・書く</h2>
+              <p>
+                「＋ 新規」を押すと新しいメモが作られます。上の欄にタイトルを、広いスペースに本文を入力してください。
+                入力をやめると自動で保存され、画面上部の表示が「同期済み」になります。
+                何も書かずに別のメモへ移ると、空のメモは自動で片付けられます。
+              </p>
+            </div>
 
-          <div class="guide-card">
-            <h2>2. メモを探す</h2>
-            <p>
-              一覧の上にある検索ボックスにキーワードを入れると、タイトルや本文から該当するメモをすぐに絞り込めます。
-              検索欄を空にすると、すべてのメモが再び表示されます。
-            </p>
-          </div>
+            <div class="guide-card">
+              <h2>2. メモを探す</h2>
+              <p>
+                一覧の上の検索ボックスにキーワードを入れると、タイトルや本文から絞り込めます。
+                空にするとすべてのメモが表示されます。
+              </p>
+            </div>
 
-          <div class="guide-card">
-            <h2>3. 大切なメモを上に固定する（ピン留め）</h2>
-            <p>
-              よく見るメモや忘れたくないメモを開いた状態で、右上の「📌 ピン留め」を押すと、一覧の一番上に固定されます。
-              もう一度押すと固定を解除できます。
-            </p>
-          </div>
+            <div class="guide-card">
+              <h2>3. ピン留め・コピー</h2>
+              <p>
+                メモを開いて「📌」を押すと、一覧の一番上に固定されます。もう一度押すと解除できます。
+                「📋」を押すと、タイトルと本文をまとめてコピーできます。
+              </p>
+            </div>
 
-          <div class="guide-card">
-            <h2>4. メモを削除する</h2>
-            <p>
-              不要になったメモを開き、右上の「🗑 削除」を押すとメモを削除できます。
-              確認メッセージが出るので、間違いがなければ削除を実行してください。
-            </p>
-          </div>
+            <div class="guide-card">
+              <h2>4. メモを削除する</h2>
+              <p>
+                1件だけ消すときは、メモを開いて「🗑」を押します。確認のあと削除されます。
+              </p>
+              <p>
+                まとめて消すときは、一覧の「☑ 選択」を押してメモにチェックを入れ、「🗑 削除」を押してください。
+                「すべて選択」で一覧に表示中のメモを一括で選べます（検索中は検索結果だけが対象です）。
+              </p>
+            </div>
 
-          <div class="guide-card">
-            <h2>5. スマホでの見方・切り替え</h2>
-            <p>
-              スマホでは一覧画面と編集画面が切り替わります。メモを開いたあとに一覧へ戻りたいときは、左上の「← 一覧へ」を押してください。
-            </p>
-          </div>
+            <div class="guide-card">
+              <h2>5. 設定・バックアップ・アカウント削除</h2>
+              <p>
+                「⚙ 設定」では、ストレージ使用量の目安の確認、メモのバックアップ（JSON / テキスト）の書き出し、
+                全メモの削除、アカウントの削除ができます。
+              </p>
+            </div>
 
-          <div class="tutorial-actions">
-            <button class="btn-new" id="btnStartFromTutorial"><span>＋</span> 新しいメモを書いてみる</button>
+            <div class="guide-card">
+              <h2>6. スマホでの見方</h2>
+              <p>
+                スマホでは一覧画面と編集画面が切り替わります。一覧へ戻るときは左上の「← 一覧へ」を押してください。
+              </p>
+            </div>
+
+            <div class="tutorial-actions">
+              <button class="btn-new" id="btnStartFromTutorial"><span>＋</span> 新しいメモを書いてみる</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. 設定 -->
+      <section id="settingsView" aria-label="設定">
+        <header class="top-toolbar">
+          <div class="toolbar-left">
+            <button class="btn-back btn-back-to-list">← 一覧へ</button>
+            <strong>設定</strong>
+          </div>
+          <div class="toolbar-right">
+            <button class="btn-icon" id="btnCloseSettings">閉じる</button>
+          </div>
+        </header>
+
+        <div class="panel-scroll">
+          <div class="tutorial-body">
+
+            <div class="guide-card">
+              <h2>👤 アカウント</h2>
+              <p id="settingsEmail">-</p>
+              <div class="btn-row">
+                <button class="btn-chip" id="btnSettingsLogout">ログアウト</button>
+              </div>
+            </div>
+
+            <div class="guide-card">
+              <h2>💾 ストレージ（目安）</h2>
+              <div class="quota-big" id="quotaUsedText">0 B</div>
+              <div class="quota-sub" id="quotaSubText">/ 1人あたり 0 B</div>
+              <div class="meter large"><div class="meter-fill" id="quotaMeterFill"></div></div>
+              <div class="quota-sub" id="quotaPercentText">0%</div>
+
+              <table class="quota-table" id="quotaTable"></table>
+
+              <p class="small" style="margin-top:12px;">
+                ※ Firebase（Cloud Firestore）の無料枠はプロジェクト全体で共有されるため、
+                「10人が登録した場合の1人あたりの目安」を 無料枠 ÷ 10 で多めに見積もった数字です。
+                使用量はインデックス分の上乗せも含めた概算で、実際の請求・使用量とは異なります。
+                無料枠の数値は変更されることがあるため、最新情報はFirebase公式の料金ページで確認してください。
+              </p>
+            </div>
+
+            <div class="guide-card">
+              <h2>📦 バックアップ</h2>
+              <p>すべてのメモをファイルとして保存できます。</p>
+              <div class="btn-row">
+                <button class="btn-chip" id="btnExportJson">JSONで書き出す</button>
+                <button class="btn-chip" id="btnExportTxt">テキストで書き出す</button>
+              </div>
+            </div>
+
+            <div class="guide-card danger-zone">
+              <h2>⚠ 危険な操作</h2>
+              <p>
+                「全メモを削除」はアカウントを残したまま、保存されているメモをすべて消します。
+              </p>
+              <div class="btn-row">
+                <button class="btn-outline-danger" id="btnDeleteAllNotes">全メモを削除</button>
+              </div>
+              <p style="margin-top:18px;">
+                「アカウントを削除」は、すべてのメモとこのアプリのアカウント（ログイン情報）を完全に削除します。
+                Googleアカウント自体は削除されません。
+              </p>
+              <div class="btn-row">
+                <button class="btn-danger" id="btnDeleteAccount">アカウントとすべてのメモを削除</button>
+              </div>
+              <p class="small" style="margin-top:10px;">どちらも取り消せません。必要なら先にバックアップを書き出してください。</p>
+            </div>
+
           </div>
         </div>
       </section>
     </main>
   </div>
+
+  <!-- 確認モーダル -->
+  <div class="modal-backdrop" id="modalBackdrop">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <h3 id="modalTitle"></h3>
+      <div class="modal-message" id="modalMessage"></div>
+      <input type="text" class="modal-input" id="modalInput" autocomplete="off" autocapitalize="off" spellcheck="false">
+      <div class="modal-error" id="modalError"></div>
+      <div class="modal-actions">
+        <button class="btn-chip" id="modalCancel">キャンセル</button>
+        <button class="btn-primary" id="modalConfirm">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
@@ -971,6 +1140,9 @@
       getAuth,
       GoogleAuthProvider,
       signInWithPopup,
+      signInWithRedirect,
+      reauthenticateWithPopup,
+      deleteUser,
       signOut,
       onAuthStateChanged
     } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
@@ -980,13 +1152,14 @@
       doc,
       setDoc,
       deleteDoc,
+      writeBatch,
       onSnapshot,
       getDocs
     } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
     /**
      * =========================================================================
-     * Firebase 設定（あなたのプロジェクトの値に書き換えてください）
+     * Firebase 設定
      * =========================================================================
      */
     const FIREBASE_CONFIG = {
@@ -1003,54 +1176,83 @@
     const db = getFirestore(app);
     const googleProvider = new GoogleAuthProvider();
 
+    /**
+     * =========================================================================
+     * 無料枠（Spark）の目安 ※変更される可能性があります
+     *  - Firestore 保存容量: 1 GiB / 読み取り: 50,000回/日 / 書き込み: 20,000回/日
+     *  - 「10人が登録した場合」の1人あたりを 無料枠 ÷ 10 で多めに見積もる
+     * =========================================================================
+     */
+    const ASSUMED_USERS = 10;
+    const FREE_TIER = {
+      storageBytes: 1024 * 1024 * 1024,
+      readsPerDay: 50000,
+      writesPerDay: 20000,
+      deletesPerDay: 20000
+    };
+    const PER_USER_BYTES = Math.floor(FREE_TIER.storageBytes / ASSUMED_USERS);
+
+    const MAX_TITLE_LENGTH = 200;
+    const MAX_BODY_LENGTH = 100000;
+    const SAVE_DEBOUNCE_MS = 700;
+    const BATCH_SIZE = 400; // Firestoreのバッチ上限は500件
+
+    const textEncoder = new TextEncoder();
+
     function formatSaveError(err) {
       const code = err && err.code ? String(err.code) : "";
-      if (code.includes("permission-denied")) {
-        return "保存失敗（ルール確認）";
-      }
-      if (code.includes("unavailable") || code.includes("network")) {
-        return "保存失敗（通信確認）";
-      }
-      if (code) {
-        return `保存失敗 (${code.replace("firestore/", "")})`;
-      }
+      if (code.includes("permission-denied")) return "保存失敗（ルール確認）";
+      if (code.includes("unavailable") || code.includes("network")) return "保存失敗（通信確認）";
+      if (code) return `保存失敗 (${code.replace("firestore/", "")})`;
       return "保存失敗";
     }
 
     /**
-     * データ保存層（StorageService）
-     * ログインしたユーザー（uid）ごとに users/{uid}/notes へ保存します。
+     * データ保存層
+     * users/{uid}/notes/{noteId} に保存します。
      */
     const StorageService = {
-      getNotesCollectionRef(uid) {
+      notesCol(uid) {
         return collection(db, "users", uid, "notes");
       },
 
-      getNoteDocRef(uid, noteId) {
+      noteDoc(uid, noteId) {
         return doc(db, "users", uid, "notes", noteId);
       },
 
-      async ensureInitialNoteIfEmpty(uid) {
-        const colRef = this.getNotesCollectionRef(uid);
-        const snap = await getDocs(colRef);
+      /** 新規アカウントの初回ログイン時だけ、ウェルカムメモを作る */
+      async ensureWelcomeNote(user) {
+        const uid = user.uid;
+        const flagKey = `mellow-welcomed-${uid}`;
+        try {
+          if (localStorage.getItem(flagKey)) return;
+        } catch (_) { /* 無視 */ }
+
+        const meta = user.metadata || {};
+        const isBrandNew = meta.creationTime && meta.creationTime === meta.lastSignInTime;
+        if (!isBrandNew) return;
+
+        const snap = await getDocs(this.notesCol(uid));
         if (snap.empty) {
+          const now = Date.now();
           const welcomeNote = {
             id: "welcome-note-1",
             title: "最初のメモ ☕",
             body: "気軽にメモを書いてみてください。\n左上の「使い方」から基本操作も確認できます。",
             isPinned: true,
-            createdAt: Date.now(),
-            updatedAt: Date.now()
+            createdAt: now,
+            updatedAt: now
           };
-          await setDoc(this.getNoteDocRef(uid, welcomeNote.id), welcomeNote);
+          await setDoc(this.noteDoc(uid, welcomeNote.id), welcomeNote);
         }
+        try { localStorage.setItem(flagKey, "1"); } catch (_) { /* 無視 */ }
       },
 
       subscribeNotes(uid, onData, onError) {
         return onSnapshot(
-          this.getNotesCollectionRef(uid),
+          this.notesCol(uid),
           (snapshot) => {
-            const notes = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+            const notes = snapshot.docs.map((d) => ({ ...d.data(), id: d.id }));
             onData(notes);
           },
           (error) => {
@@ -1061,12 +1263,28 @@
       },
 
       async saveNote(uid, note) {
-        await setDoc(this.getNoteDocRef(uid, note.id), note, { merge: true });
+        await setDoc(this.noteDoc(uid, note.id), note, { merge: true });
         return note;
       },
 
       async deleteNote(uid, noteId) {
-        await deleteDoc(this.getNoteDocRef(uid, noteId));
+        await deleteDoc(this.noteDoc(uid, noteId));
+      },
+
+      async deleteNotes(uid, noteIds) {
+        for (let i = 0; i < noteIds.length; i += BATCH_SIZE) {
+          const batch = writeBatch(db);
+          noteIds.slice(i, i + BATCH_SIZE).forEach((id) => batch.delete(this.noteDoc(uid, id)));
+          await batch.commit();
+        }
+      },
+
+      /** サーバー上の全メモを削除（件数を返す） */
+      async deleteAllNotes(uid) {
+        const snap = await getDocs(this.notesCol(uid));
+        const ids = snap.docs.map((d) => d.id);
+        await this.deleteNotes(uid, ids);
+        return ids.length;
       }
     };
 
@@ -1074,43 +1292,85 @@
       user: null,
       notes: [],
       activeNoteId: null,
-      isTutorialOpen: false,
+      panel: null, // null | "tutorial" | "settings"
       searchQuery: "",
       saveTimer: null,
+      pendingNote: null,
       unsubscribeNotes: null,
-      lastSavedSignature: new Map()
+      lastSavedSignature: new Map(),
+      filledNoteId: null,
+      selectMode: false,
+      selectedIds: new Set(),
+      sizeCache: new Map()
     };
 
+    const $ = (id) => document.getElementById(id);
     const els = {
-      loginScreen: document.getElementById("loginScreen"),
-      btnGoogleLogin: document.getElementById("btnGoogleLogin"),
-      loginError: document.getElementById("loginError"),
-      appContainer: document.getElementById("appContainer"),
-      userEmailLabel: document.getElementById("userEmailLabel"),
-      btnLogout: document.getElementById("btnLogout"),
-      noteList: document.getElementById("noteList"),
-      noteCountLabel: document.getElementById("noteCountLabel"),
-      totalCharSummary: document.getElementById("totalCharSummary"),
-      searchInput: document.getElementById("searchInput"),
-      btnNewNote: document.getElementById("btnNewNote"),
-      btnOpenTutorial: document.getElementById("btnOpenTutorial"),
-      btnEmptyTutorial: document.getElementById("btnEmptyTutorial"),
-      btnCloseTutorial: document.getElementById("btnCloseTutorial"),
-      btnStartFromTutorial: document.getElementById("btnStartFromTutorial"),
+      loginScreen: $("loginScreen"),
+      btnGoogleLogin: $("btnGoogleLogin"),
+      loginError: $("loginError"),
+      appContainer: $("appContainer"),
+      userEmailLabel: $("userEmailLabel"),
+      btnLogout: $("btnLogout"),
+      noteList: $("noteList"),
+      noteCountLabel: $("noteCountLabel"),
+      totalCharSummary: $("totalCharSummary"),
+      searchInput: $("searchInput"),
+      btnNewNote: $("btnNewNote"),
+      btnOpenTutorial: $("btnOpenTutorial"),
+      btnOpenSettings: $("btnOpenSettings"),
+      btnToggleSelect: $("btnToggleSelect"),
+      btnEmptyTutorial: $("btnEmptyTutorial"),
+      btnCloseTutorial: $("btnCloseTutorial"),
+      btnCloseSettings: $("btnCloseSettings"),
+      btnStartFromTutorial: $("btnStartFromTutorial"),
       backButtons: document.querySelectorAll(".btn-back-to-list"),
-      editorView: document.getElementById("editorView"),
-      noNoteView: document.getElementById("noNoteView"),
-      tutorialView: document.getElementById("tutorialView"),
-      statusDot: document.getElementById("statusDot"),
-      saveStatusText: document.getElementById("saveStatusText"),
-      btnPin: document.getElementById("btnPin"),
-      pinBtnText: document.getElementById("pinBtnText"),
-      btnDelete: document.getElementById("btnDelete"),
-      editorDateInfo: document.getElementById("editorDateInfo"),
-      inputTitle: document.getElementById("inputTitle"),
-      inputBody: document.getElementById("inputBody"),
-      charCount: document.getElementById("charCount")
+      selectBar: $("selectBar"),
+      selectedCount: $("selectedCount"),
+      btnSelectAll: $("btnSelectAll"),
+      btnDeleteSelected: $("btnDeleteSelected"),
+      btnCancelSelect: $("btnCancelSelect"),
+      editorView: $("editorView"),
+      noNoteView: $("noNoteView"),
+      noNoteText: $("noNoteText"),
+      tutorialView: $("tutorialView"),
+      settingsView: $("settingsView"),
+      statusDot: $("statusDot"),
+      saveStatusText: $("saveStatusText"),
+      btnCopy: $("btnCopy"),
+      btnPin: $("btnPin"),
+      pinBtnText: $("pinBtnText"),
+      btnDelete: $("btnDelete"),
+      editorDateInfo: $("editorDateInfo"),
+      inputTitle: $("inputTitle"),
+      inputBody: $("inputBody"),
+      charCount: $("charCount"),
+      charLimitNote: $("charLimitNote"),
+      sidebarStorage: $("sidebarStorage"),
+      miniStorageText: $("miniStorageText"),
+      miniMeterFill: $("miniMeterFill"),
+      settingsEmail: $("settingsEmail"),
+      quotaUsedText: $("quotaUsedText"),
+      quotaSubText: $("quotaSubText"),
+      quotaMeterFill: $("quotaMeterFill"),
+      quotaPercentText: $("quotaPercentText"),
+      quotaTable: $("quotaTable"),
+      btnSettingsLogout: $("btnSettingsLogout"),
+      btnExportJson: $("btnExportJson"),
+      btnExportTxt: $("btnExportTxt"),
+      btnDeleteAllNotes: $("btnDeleteAllNotes"),
+      btnDeleteAccount: $("btnDeleteAccount"),
+      modalBackdrop: $("modalBackdrop"),
+      modalTitle: $("modalTitle"),
+      modalMessage: $("modalMessage"),
+      modalInput: $("modalInput"),
+      modalError: $("modalError"),
+      modalCancel: $("modalCancel"),
+      modalConfirm: $("modalConfirm"),
+      toast: $("toast")
     };
+
+    /* ===================== ユーティリティ ===================== */
 
     function getNoteSignature(note) {
       return `${note.title ?? ""}|||${note.body ?? ""}|||${Boolean(note.isPinned)}`;
@@ -1128,9 +1388,7 @@
 
     function sortNotes(notes) {
       return [...notes].sort((a, b) => {
-        if (Boolean(a.isPinned) !== Boolean(b.isPinned)) {
-          return a.isPinned ? -1 : 1;
-        }
+        if (Boolean(a.isPinned) !== Boolean(b.isPinned)) return a.isPinned ? -1 : 1;
         return (b.updatedAt || 0) - (a.updatedAt || 0);
       });
     }
@@ -1144,16 +1402,178 @@
         .replace(/'/g, "&#039;");
     }
 
+    function isEmptyNote(note) {
+      return !(note.title || "").trim() && !(note.body || "").trim();
+    }
+
+    function formatBytes(n) {
+      if (n < 1024) return `${Math.round(n)} B`;
+      if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
+      if (n < 1024 * 1024 * 1024) return `${(n / 1024 / 1024).toFixed(1)} MB`;
+      return `${(n / 1024 / 1024 / 1024).toFixed(2)} GB`;
+    }
+
+    /**
+     * 1メモあたりの保存サイズの概算（多め）。
+     *  - 本文・タイトルのUTF-8バイト数
+     *  - ドキュメント名・フィールド名などの固定オーバーヘッド
+     *  - 自動インデックス（昇順・降順の2本、文字列は先頭1500バイトまで）の上乗せ
+     */
+    function estimateNoteBytes(note) {
+      const key = `${note.updatedAt}:${(note.title || "").length}:${(note.body || "").length}`;
+      const cached = state.sizeCache.get(note.id);
+      if (cached && cached.key === key) return cached.bytes;
+
+      const t = textEncoder.encode(note.title || "").length;
+      const b = textEncoder.encode(note.body || "").length;
+      const indexed = Math.min(t, 1500) + Math.min(b, 1500);
+      const bytes = t + b + 500 + indexed * 2 + 1200;
+      state.sizeCache.set(note.id, { key, bytes });
+      return bytes;
+    }
+
+    function getUsedBytes() {
+      return state.notes.reduce((sum, n) => sum + estimateNoteBytes(n), 0);
+    }
+
+    let toastTimer = null;
+    function showToast(message) {
+      els.toast.textContent = message;
+      els.toast.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => els.toast.classList.remove("show"), 2400);
+    }
+
+    function isMobileLayout() {
+      return window.innerWidth <= 768;
+    }
+
+    function ensureOnline() {
+      if (!navigator.onLine) {
+        throw new Error("オフラインのため実行できません。通信状況を確認してからもう一度お試しください。");
+      }
+    }
+
+    function errorMessage(err) {
+      const code = err && err.code ? String(err.code) : "";
+      if (code.includes("permission-denied")) return "権限がありません。Firestoreのセキュリティルールを確認してください。";
+      if (code.includes("requires-recent-login")) return "本人確認が必要です。もう一度お試しください。";
+      if (code.includes("popup-closed-by-user") || code.includes("cancelled-popup-request")) return "本人確認がキャンセルされました。";
+      if (code.includes("popup-blocked")) return "ポップアップがブロックされました。許可してからもう一度お試しください。";
+      if (code.includes("user-mismatch")) return "ログイン中のアカウントと異なるGoogleアカウントが選択されました。";
+      if (err && err.message) return err.message;
+      return "エラーが発生しました。";
+    }
+
+    /* ===================== モーダル ===================== */
+
+    const modalState = { open: false, busy: false, action: null, requireText: null };
+
+    function openModal({ title, message, confirmLabel = "OK", danger = false, requireText = null, action }) {
+      modalState.open = true;
+      modalState.busy = false;
+      modalState.action = action;
+      modalState.requireText = requireText;
+
+      els.modalTitle.textContent = title;
+      els.modalMessage.textContent = message;
+      els.modalError.textContent = "";
+      els.modalConfirm.textContent = confirmLabel;
+      els.modalConfirm.className = danger ? "btn-danger" : "btn-primary";
+      els.modalCancel.disabled = false;
+
+      if (requireText) {
+        els.modalInput.style.display = "block";
+        els.modalInput.value = "";
+        els.modalInput.placeholder = `「${requireText}」と入力`;
+        els.modalConfirm.disabled = true;
+      } else {
+        els.modalInput.style.display = "none";
+        els.modalConfirm.disabled = false;
+      }
+
+      els.modalBackdrop.classList.add("open");
+      if (requireText) setTimeout(() => els.modalInput.focus(), 50);
+    }
+
+    function closeModal() {
+      modalState.open = false;
+      modalState.busy = false;
+      modalState.action = null;
+      els.modalBackdrop.classList.remove("open");
+    }
+
+    async function runModalAction() {
+      if (modalState.busy || !modalState.action) return;
+      const label = els.modalConfirm.textContent;
+      modalState.busy = true;
+      els.modalConfirm.disabled = true;
+      els.modalCancel.disabled = true;
+      els.modalConfirm.textContent = "処理中...";
+      els.modalError.textContent = "";
+
+      try {
+        await modalState.action();
+        closeModal();
+      } catch (err) {
+        console.error(err);
+        modalState.busy = false;
+        els.modalError.textContent = errorMessage(err);
+        els.modalCancel.disabled = false;
+        els.modalConfirm.textContent = label;
+        els.modalConfirm.disabled = modalState.requireText
+          ? els.modalInput.value.trim() !== modalState.requireText
+          : false;
+      }
+    }
+
+    /* ===================== 表示更新 ===================== */
+
+    function updateStorageDisplay() {
+      const used = getUsedBytes();
+      const ratio = used / PER_USER_BYTES;
+      const percent = ratio * 100;
+      const percentText = percent < 1 ? percent.toFixed(3) : percent.toFixed(1);
+      const width = Math.min(100, Math.max(used > 0 ? 0.6 : 0, percent));
+      const level = percent >= 90 ? "full" : percent >= 70 ? "warn" : "";
+
+      [els.miniMeterFill, els.quotaMeterFill].forEach((el) => {
+        el.style.width = `${width}%`;
+        el.classList.remove("warn", "full");
+        if (level) el.classList.add(level);
+      });
+
+      els.miniStorageText.textContent = `${formatBytes(used)} / ${formatBytes(PER_USER_BYTES)}`;
+      els.quotaUsedText.textContent = formatBytes(used);
+      els.quotaSubText.textContent = `/ 1人あたりの目安 ${formatBytes(PER_USER_BYTES)}（${ASSUMED_USERS}人で無料枠 ${formatBytes(FREE_TIER.storageBytes)} を分けた場合）`;
+      els.quotaPercentText.textContent = `使用率 約 ${percentText}%（メモ ${state.notes.length.toLocaleString()} 件）`;
+
+      const approxChars = Math.floor(PER_USER_BYTES / 3 / 10000000) * 1000; // 単位：万文字
+      const perUserReads = Math.floor(FREE_TIER.readsPerDay / ASSUMED_USERS);
+      const perUserWrites = Math.floor(FREE_TIER.writesPerDay / ASSUMED_USERS);
+
+      els.quotaTable.innerHTML = `
+        <tr><td>無料枠（Firestore保存容量）</td><td>${formatBytes(FREE_TIER.storageBytes)}</td></tr>
+        <tr><td>1人あたりの目安（÷${ASSUMED_USERS}）</td><td>約 ${formatBytes(PER_USER_BYTES)}</td></tr>
+        <tr><td>安全側に見た場合（余裕20%）</td><td>約 ${formatBytes(PER_USER_BYTES * 0.8)}</td></tr>
+        <tr><td>日本語の本文なら（1文字≒3バイト）</td><td>約 ${approxChars.toLocaleString()}万文字ぶん</td></tr>
+        <tr><td>1日の読み取り回数（1人あたり目安）</td><td>${perUserReads.toLocaleString()} 回</td></tr>
+        <tr><td>1日の書き込み回数（1人あたり目安）</td><td>${perUserWrites.toLocaleString()} 回</td></tr>
+      `;
+    }
+
     function updateSummaryStats() {
       const totalChars = state.notes.reduce((sum, n) => sum + (n.body ? n.body.length : 0), 0);
       els.totalCharSummary.textContent = `合計 ${totalChars.toLocaleString()} 文字`;
+      updateStorageDisplay();
     }
 
     function setSaveStatus(status, customText = "") {
       els.statusDot.classList.remove("saving", "error");
       if (status === "saving") {
         els.statusDot.classList.add("saving");
-        els.saveStatusText.textContent = customText || "保存中...";
+        els.saveStatusText.textContent =
+          customText || (navigator.onLine ? "保存中..." : "オフライン：復帰後に同期");
       } else if (status === "error") {
         els.statusDot.classList.add("error");
         els.saveStatusText.textContent = customText || "保存失敗";
@@ -1163,138 +1583,312 @@
     }
 
     function updatePinButton(isPinned) {
-      if (isPinned) {
-        els.btnPin.classList.add("pinned");
-        els.pinBtnText.textContent = "固定中";
-      } else {
-        els.btnPin.classList.remove("pinned");
-        els.pinBtnText.textContent = "ピン留め";
-      }
+      els.btnPin.classList.toggle("pinned", isPinned);
+      els.pinBtnText.textContent = isPinned ? "固定中" : "ピン留め";
     }
 
     function updateCharCount(text) {
       const count = (text || "").length;
       els.charCount.textContent = `${count.toLocaleString()} 文字`;
+      els.charLimitNote.textContent =
+        count >= MAX_BODY_LENGTH * 0.9 ? `1メモの上限は ${MAX_BODY_LENGTH.toLocaleString()} 文字です` : "";
     }
 
     function updateRightPaneVisibility() {
-      els.btnOpenTutorial.classList.toggle("active", state.isTutorialOpen);
+      els.btnOpenTutorial.classList.toggle("active", state.panel === "tutorial");
+      els.btnOpenSettings.classList.toggle("active", state.panel === "settings");
 
-      if (state.isTutorialOpen) {
-        els.editorView.style.display = "none";
-        els.noNoteView.style.display = "none";
+      els.editorView.style.display = "none";
+      els.noNoteView.style.display = "none";
+      els.tutorialView.style.display = "none";
+      els.settingsView.style.display = "none";
+
+      if (state.panel === "tutorial") {
         els.tutorialView.style.display = "flex";
+        state.filledNoteId = null;
+        return;
+      }
+      if (state.panel === "settings") {
+        els.settingsView.style.display = "flex";
+        state.filledNoteId = null;
+        updateStorageDisplay();
         return;
       }
 
-      els.tutorialView.style.display = "none";
       const note = state.notes.find((n) => n.id === state.activeNoteId);
 
-      if (note) {
-        els.noNoteView.style.display = "none";
+      if (note && !state.selectMode) {
         els.editorView.style.display = "flex";
 
         const isFocusedOnEditor =
           document.activeElement === els.inputTitle || document.activeElement === els.inputBody;
 
-        if (!isFocusedOnEditor) {
+        if (state.filledNoteId !== note.id || !isFocusedOnEditor) {
           els.inputTitle.value = note.title || "";
           els.inputBody.value = note.body || "";
+          state.filledNoteId = note.id;
         }
 
-        els.editorDateInfo.textContent = `最終更新: ${formatDate(note.updatedAt)}`;
+        els.editorDateInfo.textContent =
+          `作成: ${formatDate(note.createdAt)}　最終更新: ${formatDate(note.updatedAt)}`;
         updateCharCount(els.inputBody.value);
         updatePinButton(Boolean(note.isPinned));
-        if (!els.statusDot.classList.contains("error")) {
-          setSaveStatus("saved");
-        }
+        if (!els.statusDot.classList.contains("error")) setSaveStatus("saved");
       } else {
-        els.editorView.style.display = "none";
+        state.filledNoteId = null;
         els.noNoteView.style.display = "flex";
+        els.noNoteText.innerHTML = state.selectMode
+          ? "削除したいメモにチェックを入れて、<br>「🗑 削除」を押してください。"
+          : "左の一覧からメモを選ぶか、<br>「＋ 新規」から書き始めましょう。";
       }
     }
 
-    function openTutorial() {
-      state.isTutorialOpen = true;
-      state.activeNoteId = null;
-      renderNoteList();
-      updateRightPaneVisibility();
-      els.appContainer.classList.add("mobile-detail-open");
+    function getFilteredNotes() {
+      const query = state.searchQuery.trim().toLowerCase();
+      const sorted = sortNotes(state.notes);
+      if (!query) return sorted;
+      return sorted.filter(
+        (n) =>
+          (n.title && n.title.toLowerCase().includes(query)) ||
+          (n.body && n.body.toLowerCase().includes(query))
+      );
     }
 
-    function closeTutorial() {
-      state.isTutorialOpen = false;
-      updateRightPaneVisibility();
-      if (window.innerWidth <= 768) {
-        els.appContainer.classList.remove("mobile-detail-open");
-      }
+    function updateSelectBar(filtered) {
+      els.selectBar.classList.toggle("visible", state.selectMode);
+      els.btnToggleSelect.classList.toggle("active", state.selectMode);
+
+      const count = state.selectedIds.size;
+      els.selectedCount.textContent = `${count}件選択中`;
+      els.btnDeleteSelected.disabled = count === 0;
+
+      const visibleIds = filtered.map((n) => n.id);
+      const allSelected = visibleIds.length > 0 && visibleIds.every((id) => state.selectedIds.has(id));
+      els.btnSelectAll.textContent = allSelected ? "選択解除" : "すべて選択";
+      els.btnSelectAll.disabled = visibleIds.length === 0;
     }
 
     function renderNoteList() {
-      const query = state.searchQuery.trim().toLowerCase();
-      const sorted = sortNotes(state.notes);
-      const filtered = query
-        ? sorted.filter(
-            (n) =>
-              (n.title && n.title.toLowerCase().includes(query)) ||
-              (n.body && n.body.toLowerCase().includes(query))
-          )
-        : sorted;
+      const query = state.searchQuery.trim();
+      const filtered = getFilteredNotes();
 
       els.noteCountLabel.textContent = query
         ? `検索結果 (${filtered.length}件)`
         : `すべてのメモ (${state.notes.length}件)`;
 
       updateSummaryStats();
+      updateSelectBar(filtered);
       els.noteList.innerHTML = "";
 
       if (filtered.length === 0) {
         els.noteList.innerHTML = `
           <div class="empty-list">
-            ${
-              query
-                ? "一致するメモが見つかりませんでした。"
-                : "メモがまだありません。<br>右上の「＋ 新規」から作成できます。"
-            }
+            ${query ? "一致するメモが見つかりませんでした。" : "メモがまだありません。<br>右上の「＋ 新規」から作成できます。"}
           </div>
         `;
         return;
       }
 
       filtered.forEach((note) => {
+        const isSelected = state.selectedIds.has(note.id);
+        const isActive = !state.selectMode && !state.panel && note.id === state.activeNoteId;
+
         const card = document.createElement("div");
-        card.className = `note-card ${!state.isTutorialOpen && note.id === state.activeNoteId ? "active" : ""}`;
+        card.className = `note-card${isActive ? " active" : ""}${isSelected ? " selected" : ""}`;
 
         const displayTitle = (note.title || "").trim() || "無題のメモ";
         const displayPreview = (note.body || "").trim().replace(/\n/g, " ") || "本文なし";
 
         card.innerHTML = `
-          <div class="note-card-header">
-            <div class="note-card-title">${escapeHtml(displayTitle)}</div>
-            ${note.isPinned ? '<span class="pin-badge" title="ピン留め中">📌</span>' : ""}
+          ${state.selectMode ? `<span class="check${isSelected ? " on" : ""}">✓</span>` : ""}
+          <div class="note-card-main">
+            <div class="note-card-header">
+              <div class="note-card-title">${escapeHtml(displayTitle)}</div>
+              ${note.isPinned ? '<span class="pin-badge" title="ピン留め中">📌</span>' : ""}
+            </div>
+            <div class="note-card-preview">${escapeHtml(displayPreview)}</div>
+            <div class="note-card-date">${formatDate(note.updatedAt)}</div>
           </div>
-          <div class="note-card-preview">${escapeHtml(displayPreview)}</div>
-          <div class="note-card-date">${formatDate(note.updatedAt)}</div>
         `;
 
-        card.addEventListener("click", () => selectNote(note.id, true));
+        card.addEventListener("click", () => selectNote(note.id));
         els.noteList.appendChild(card);
       });
     }
 
-    function selectNote(noteId, isMobileOpen = true) {
-      state.isTutorialOpen = false;
-      state.activeNoteId = noteId;
-      renderNoteList();
-      updateRightPaneVisibility();
+    /* ===================== 保存処理 ===================== */
 
-      if (isMobileOpen && noteId) {
-        els.appContainer.classList.add("mobile-detail-open");
+    function cancelPendingSave() {
+      clearTimeout(state.saveTimer);
+      state.saveTimer = null;
+      state.pendingNote = null;
+    }
+
+    function scheduleSave(note) {
+      state.pendingNote = note;
+      clearTimeout(state.saveTimer);
+      state.saveTimer = setTimeout(flushPendingSave, SAVE_DEBOUNCE_MS);
+    }
+
+    async function flushPendingSave() {
+      clearTimeout(state.saveTimer);
+      state.saveTimer = null;
+
+      const note = state.pendingNote;
+      state.pendingNote = null;
+      if (!note || !state.user) return;
+
+      const sig = getNoteSignature(note);
+      if (state.lastSavedSignature.get(note.id) === sig) {
+        setSaveStatus("saved");
+        return;
+      }
+
+      try {
+        await StorageService.saveNote(state.user.uid, note);
+        state.lastSavedSignature.set(note.id, sig);
+        if (note.id === state.activeNoteId) {
+          els.editorDateInfo.textContent =
+            `作成: ${formatDate(note.createdAt)}　最終更新: ${formatDate(note.updatedAt)}`;
+        }
+        if (!state.pendingNote) setSaveStatus("saved");
+      } catch (err) {
+        console.error(err);
+        setSaveStatus("error", formatSaveError(err));
       }
     }
 
+    function removeNotesLocally(ids) {
+      const idSet = new Set(ids);
+      if (state.pendingNote && idSet.has(state.pendingNote.id)) cancelPendingSave();
+      state.notes = state.notes.filter((n) => !idSet.has(n.id));
+      ids.forEach((id) => {
+        state.lastSavedSignature.delete(id);
+        state.sizeCache.delete(id);
+        state.selectedIds.delete(id);
+      });
+      if (state.activeNoteId && idSet.has(state.activeNoteId)) state.activeNoteId = null;
+    }
+
+    /** 何も書かれていない空メモは、離れるときに自動で削除する */
+    function cleanupEmptyNote(noteId) {
+      if (!noteId || !state.user) return;
+      const note = state.notes.find((n) => n.id === noteId);
+      if (!note || note.isPinned || !isEmptyNote(note)) return;
+
+      removeNotesLocally([noteId]);
+      StorageService.deleteNote(state.user.uid, noteId).catch((err) => console.error(err));
+    }
+
+    /* ===================== 画面操作 ===================== */
+
+    function showMobileDetail(show) {
+      els.appContainer.classList.toggle("mobile-detail-open", show);
+    }
+
+    function selectNote(noteId) {
+      if (state.selectMode) {
+        toggleSelected(noteId);
+        return;
+      }
+
+      flushPendingSave();
+      const prevId = state.activeNoteId;
+      if (prevId && prevId !== noteId) cleanupEmptyNote(prevId);
+
+      state.panel = null;
+      state.activeNoteId = noteId;
+      renderNoteList();
+      updateRightPaneVisibility();
+      showMobileDetail(true);
+    }
+
+    function openPanel(name) {
+      flushPendingSave();
+      cleanupEmptyNote(state.activeNoteId);
+      if (state.selectMode) exitSelectMode(false);
+      state.panel = name;
+      state.activeNoteId = null;
+      renderNoteList();
+      updateRightPaneVisibility();
+      showMobileDetail(true);
+    }
+
+    function closePanel() {
+      state.panel = null;
+      renderNoteList();
+      updateRightPaneVisibility();
+      if (isMobileLayout()) showMobileDetail(false);
+    }
+
+    function goBackToList() {
+      flushPendingSave();
+      cleanupEmptyNote(state.activeNoteId);
+      showMobileDetail(false);
+      state.panel = null;
+      state.activeNoteId = null;
+      renderNoteList();
+      updateRightPaneVisibility();
+    }
+
+    function enterSelectMode() {
+      flushPendingSave();
+      cleanupEmptyNote(state.activeNoteId);
+      state.selectMode = true;
+      state.selectedIds.clear();
+      state.panel = null;
+      state.activeNoteId = null;
+      showMobileDetail(false);
+      renderNoteList();
+      updateRightPaneVisibility();
+    }
+
+    function exitSelectMode(rerender = true) {
+      state.selectMode = false;
+      state.selectedIds.clear();
+      if (rerender) {
+        renderNoteList();
+        updateRightPaneVisibility();
+      }
+    }
+
+    function toggleSelected(noteId) {
+      if (state.selectedIds.has(noteId)) state.selectedIds.delete(noteId);
+      else state.selectedIds.add(noteId);
+      renderNoteList();
+    }
+
+    function toggleSelectAll() {
+      const visibleIds = getFilteredNotes().map((n) => n.id);
+      const allSelected = visibleIds.length > 0 && visibleIds.every((id) => state.selectedIds.has(id));
+      if (allSelected) visibleIds.forEach((id) => state.selectedIds.delete(id));
+      else visibleIds.forEach((id) => state.selectedIds.add(id));
+      renderNoteList();
+    }
+
+    /* ===================== メモ操作 ===================== */
+
     async function createNewNote() {
       if (!state.user) return;
+      if (state.selectMode) exitSelectMode(false);
+
+      // 検索で絞り込み中だと新規メモが一覧に出ないため、検索をクリア
+      if (state.searchQuery) {
+        state.searchQuery = "";
+        els.searchInput.value = "";
+      }
+
+      // すでに空のメモを開いているなら、増やさずそれを使う
+      const current = state.notes.find((n) => n.id === state.activeNoteId);
+      if (!state.panel && current && isEmptyNote(current)) {
+        selectNote(current.id);
+        els.inputTitle.focus();
+        return;
+      }
+
+      flushPendingSave();
+      cleanupEmptyNote(state.activeNoteId);
+
       const now = Date.now();
       const newNote = {
         id: "note-" + now + "-" + Math.random().toString(36).substring(2, 7),
@@ -1306,7 +1900,11 @@
       };
 
       state.notes.unshift(newNote);
-      selectNote(newNote.id, true);
+      state.panel = null;
+      state.activeNoteId = newNote.id;
+      renderNoteList();
+      updateRightPaneVisibility();
+      showMobileDetail(true);
       els.inputTitle.focus();
 
       try {
@@ -1332,24 +1930,7 @@
       updateCharCount(note.body);
       setSaveStatus("saving");
       renderNoteList();
-
-      clearTimeout(state.saveTimer);
-      state.saveTimer = setTimeout(async () => {
-        const sig = getNoteSignature(note);
-        if (state.lastSavedSignature.get(note.id) === sig) {
-          setSaveStatus("saved");
-          return;
-        }
-        try {
-          await StorageService.saveNote(state.user.uid, note);
-          state.lastSavedSignature.set(note.id, sig);
-          els.editorDateInfo.textContent = `最終更新: ${formatDate(note.updatedAt)}`;
-          setSaveStatus("saved");
-        } catch (err) {
-          console.error(err);
-          setSaveStatus("error", formatSaveError(err));
-        }
-      }, 400);
+      scheduleSave(note);
     }
 
     async function togglePin() {
@@ -1357,8 +1938,7 @@
       const note = state.notes.find((n) => n.id === state.activeNoteId);
       if (!note) return;
 
-      note.isPinned = !note.isPinned;
-      note.updatedAt = Date.now();
+      note.isPinned = !note.isPinned; // 更新日時は変えない（並び順が勝手に変わらないように）
       updatePinButton(note.isPinned);
       renderNoteList();
 
@@ -1373,74 +1953,283 @@
       }
     }
 
-    async function deleteCurrentNote() {
+    async function copyCurrentNote() {
+      const note = state.notes.find((n) => n.id === state.activeNoteId);
+      if (!note) return;
+      const text = [(note.title || "").trim(), note.body || ""].filter(Boolean).join("\n\n");
+
+      try {
+        await navigator.clipboard.writeText(text);
+        showToast("コピーしました");
+      } catch (_) {
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        ta.style.position = "fixed";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.select();
+        let ok = false;
+        try { ok = document.execCommand("copy"); } catch (_) { /* 無視 */ }
+        ta.remove();
+        showToast(ok ? "コピーしました" : "コピーできませんでした");
+      }
+    }
+
+    function deleteCurrentNote() {
       if (!state.user) return;
       const note = state.notes.find((n) => n.id === state.activeNoteId);
       if (!note) return;
 
       const title = (note.title || "").trim() || "無題のメモ";
-      if (!confirm(`「${title}」を削除しますか？\nこの操作は取り消せません。`)) {
+      const targetId = note.id;
+
+      openModal({
+        title: "メモを削除しますか？",
+        message: `「${title}」を削除します。\nこの操作は取り消せません。`,
+        confirmLabel: "削除する",
+        danger: true,
+        action: async () => {
+          await StorageService.deleteNote(state.user.uid, targetId);
+          removeNotesLocally([targetId]);
+          showMobileDetail(false);
+          renderNoteList();
+          updateRightPaneVisibility();
+          showToast("メモを削除しました");
+        }
+      });
+    }
+
+    function deleteSelectedNotes() {
+      if (!state.user || state.selectedIds.size === 0) return;
+      const ids = [...state.selectedIds];
+
+      openModal({
+        title: `${ids.length}件のメモを削除しますか？`,
+        message: "選択したメモをまとめて削除します。\nこの操作は取り消せません。",
+        confirmLabel: `${ids.length}件を削除`,
+        danger: true,
+        action: async () => {
+          ensureOnline();
+          await StorageService.deleteNotes(state.user.uid, ids);
+          removeNotesLocally(ids);
+          exitSelectMode(false);
+          renderNoteList();
+          updateRightPaneVisibility();
+          showToast(`${ids.length}件のメモを削除しました`);
+        }
+      });
+    }
+
+    /* ===================== 設定：書き出し・全削除・アカウント削除 ===================== */
+
+    function downloadFile(filename, text, mime) {
+      const blob = new Blob([text], { type: mime });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    function dateStamp() {
+      const d = new Date();
+      return `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}`;
+    }
+
+    async function exportNotes(kind) {
+      await flushPendingSave();
+      const notes = sortNotes(state.notes);
+      if (notes.length === 0) {
+        showToast("書き出すメモがありません");
         return;
       }
 
-      const targetId = note.id;
-      state.notes = state.notes.filter((n) => n.id !== targetId);
-      state.lastSavedSignature.delete(targetId);
-      state.activeNoteId = null;
+      if (kind === "json") {
+        const payload = {
+          app: "Mellow Note",
+          exportedAt: new Date().toISOString(),
+          count: notes.length,
+          notes: notes.map((n) => ({
+            id: n.id,
+            title: n.title || "",
+            body: n.body || "",
+            isPinned: Boolean(n.isPinned),
+            createdAt: n.createdAt || null,
+            updatedAt: n.updatedAt || null
+          }))
+        };
+        downloadFile(`mellow-note-${dateStamp()}.json`, JSON.stringify(payload, null, 2), "application/json");
+      } else {
+        const text = notes
+          .map((n) => {
+            const title = (n.title || "").trim() || "無題のメモ";
+            return `■ ${title}\n更新: ${formatDate(n.updatedAt)}\n\n${n.body || ""}`;
+          })
+          .join("\n\n----------------------------------------\n\n");
+        downloadFile(`mellow-note-${dateStamp()}.txt`, text, "text/plain");
+      }
+      showToast("書き出しました");
+    }
 
-      els.appContainer.classList.remove("mobile-detail-open");
-      renderNoteList();
-      updateRightPaneVisibility();
+    function deleteAllNotesFlow() {
+      if (!state.user) return;
+      const uid = state.user.uid;
 
+      openModal({
+        title: "全メモを削除しますか？",
+        message:
+          `保存されている ${state.notes.length} 件のメモをすべて削除します。\nアカウントは残ります。この操作は取り消せません。`,
+        confirmLabel: "すべて削除",
+        danger: true,
+        requireText: "削除",
+        action: async () => {
+          ensureOnline();
+          cancelPendingSave();
+          await StorageService.deleteAllNotes(uid);
+          state.notes = [];
+          state.activeNoteId = null;
+          state.selectedIds.clear();
+          state.lastSavedSignature.clear();
+          state.sizeCache.clear();
+          renderNoteList();
+          updateRightPaneVisibility();
+          showToast("全メモを削除しました");
+        }
+      });
+    }
+
+    function deleteAccountFlow() {
+      if (!state.user) return;
+
+      openModal({
+        title: "アカウントを削除しますか？",
+        message:
+          "すべてのメモと、このアプリのアカウントを完全に削除します。\n" +
+          "削除の前に、Googleアカウントでの本人確認（ポップアップ）が求められます。\n" +
+          "この操作は取り消せません。",
+        confirmLabel: "アカウントを削除",
+        danger: true,
+        requireText: "削除",
+        action: async () => {
+          const user = auth.currentUser;
+          if (!user) throw new Error("ログイン状態を確認できませんでした。");
+          const uid = user.uid;
+          ensureOnline();
+
+          // 1. 本人確認（直前に再ログインしていないと deleteUser が失敗するため先に実施）
+          await reauthenticateWithPopup(user, googleProvider);
+
+          // 2. 保存待ち・監視を止めてから全メモを削除
+          cancelPendingSave();
+          if (typeof state.unsubscribeNotes === "function") {
+            state.unsubscribeNotes();
+            state.unsubscribeNotes = null;
+          }
+
+          try {
+            await StorageService.deleteAllNotes(uid);
+            // 3. アカウント削除
+            await deleteUser(user);
+          } catch (err) {
+            // 失敗したら同期を再開して画面を保つ
+            startNotesSubscription(user);
+            throw err;
+          }
+
+          try {
+            localStorage.removeItem(`mellow-welcomed-${uid}`);
+          } catch (_) { /* 無視 */ }
+
+          // ログアウト状態になり onAuthStateChanged が画面を戻す
+          setTimeout(() => showToast("アカウントとすべてのメモを削除しました"), 300);
+        }
+      });
+    }
+
+    /* ===================== 同期・認証 ===================== */
+
+    function startNotesSubscription(user) {
+      if (typeof state.unsubscribeNotes === "function") state.unsubscribeNotes();
+
+      state.unsubscribeNotes = StorageService.subscribeNotes(
+        user.uid,
+        (cloudNotes) => {
+          state.notes = cloudNotes;
+          cloudNotes.forEach((n) => {
+            // 入力中（保存待ち）のメモは、クラウド側の内容で「保存済み」扱いにしない
+            if (!(state.pendingNote && state.pendingNote.id === n.id)) {
+              state.lastSavedSignature.set(n.id, getNoteSignature(n));
+            }
+          });
+
+          // 他の端末で削除されたメモの後始末
+          const existingIds = new Set(cloudNotes.map((n) => n.id));
+          [...state.selectedIds].forEach((id) => {
+            if (!existingIds.has(id)) state.selectedIds.delete(id);
+          });
+          if (state.activeNoteId && !existingIds.has(state.activeNoteId)) {
+            state.activeNoteId = null;
+            if (!state.panel) showMobileDetail(false);
+          }
+
+          if (
+            !isMobileLayout() &&
+            state.notes.length > 0 &&
+            !state.activeNoteId &&
+            !state.panel &&
+            !state.selectMode
+          ) {
+            state.activeNoteId = sortNotes(state.notes)[0].id;
+          }
+
+          renderNoteList();
+          updateRightPaneVisibility();
+        },
+        (err) => setSaveStatus("error", formatSaveError(err))
+      );
+    }
+
+    async function handleLogin() {
+      els.loginError.textContent = "";
+      els.btnGoogleLogin.disabled = true;
       try {
-        await StorageService.deleteNote(state.user.uid, targetId);
+        await signInWithPopup(auth, googleProvider);
       } catch (err) {
-        console.error(err);
-        setSaveStatus("error", formatSaveError(err));
+        console.error("Google login error:", err);
+        const code = err && err.code ? String(err.code) : "";
+
+        if (code === "auth/popup-closed-by-user" || code === "auth/cancelled-popup-request") {
+          // ユーザーが閉じただけなのでメッセージなし
+        } else if (
+          code === "auth/popup-blocked" ||
+          code === "auth/operation-not-supported-in-this-environment"
+        ) {
+          try {
+            await signInWithRedirect(auth, googleProvider);
+            return;
+          } catch (err2) {
+            console.error("Redirect login error:", err2);
+            els.loginError.textContent = "ログインに失敗しました。ブラウザでポップアップを許可してお試しください。";
+          }
+        } else if (code === "auth/unauthorized-domain") {
+          els.loginError.textContent = "このドメインがFirebaseの「承認済みドメイン」に登録されていません。";
+        } else if (code === "auth/network-request-failed") {
+          els.loginError.textContent = "通信に失敗しました。ネットワークを確認してください。";
+        } else {
+          els.loginError.textContent = "ログインに失敗しました。設定や承認済みドメインをご確認ください。";
+        }
+      } finally {
+        els.btnGoogleLogin.disabled = false;
       }
     }
 
-    function bindEvents() {
-      els.btnGoogleLogin.addEventListener("click", async () => {
-        els.loginError.textContent = "";
-        try {
-          await signInWithPopup(auth, googleProvider);
-        } catch (err) {
-          console.error("Google login error:", err);
-          els.loginError.textContent = "ログインに失敗しました。設定や承認済みドメインをご確認ください。";
-        }
-      });
-
-      els.btnLogout.addEventListener("click", async () => {
-        clearTimeout(state.saveTimer);
-        await signOut(auth);
-      });
-
-      els.btnNewNote.addEventListener("click", createNewNote);
-      els.btnOpenTutorial.addEventListener("click", openTutorial);
-      els.btnEmptyTutorial.addEventListener("click", openTutorial);
-      els.btnCloseTutorial.addEventListener("click", closeTutorial);
-      els.btnStartFromTutorial.addEventListener("click", createNewNote);
-
-      els.inputTitle.addEventListener("input", handleEditorInput);
-      els.inputBody.addEventListener("input", handleEditorInput);
-      els.btnPin.addEventListener("click", togglePin);
-      els.btnDelete.addEventListener("click", deleteCurrentNote);
-
-      els.searchInput.addEventListener("input", (e) => {
-        state.searchQuery = e.target.value;
-        renderNoteList();
-      });
-
-      els.backButtons.forEach((btn) => {
-        btn.addEventListener("click", () => {
-          els.appContainer.classList.remove("mobile-detail-open");
-          state.isTutorialOpen = false;
-          state.activeNoteId = null;
-          renderNoteList();
-          updateRightPaneVisibility();
-        });
-      });
+    async function handleLogout() {
+      await flushPendingSave();
+      cancelPendingSave();
+      await signOut(auth);
     }
 
     function cleanupUserSession() {
@@ -1448,13 +2237,113 @@
         state.unsubscribeNotes();
         state.unsubscribeNotes = null;
       }
+      cancelPendingSave();
+      if (modalState.open) closeModal();
+
       state.user = null;
       state.notes = [];
       state.activeNoteId = null;
-      state.isTutorialOpen = false;
+      state.panel = null;
+      state.searchQuery = "";
+      state.filledNoteId = null;
+      state.selectMode = false;
+      state.selectedIds.clear();
       state.lastSavedSignature.clear();
+      state.sizeCache.clear();
+
+      els.searchInput.value = "";
+      els.inputTitle.value = "";
+      els.inputBody.value = "";
+      els.noteList.innerHTML = "";
       els.appContainer.classList.remove("authenticated", "mobile-detail-open");
       els.loginScreen.style.display = "flex";
+    }
+
+    /* ===================== イベント ===================== */
+
+    function bindEvents() {
+      els.btnGoogleLogin.addEventListener("click", handleLogin);
+      els.btnLogout.addEventListener("click", handleLogout);
+      els.btnSettingsLogout.addEventListener("click", handleLogout);
+
+      els.btnNewNote.addEventListener("click", createNewNote);
+      els.btnStartFromTutorial.addEventListener("click", createNewNote);
+      els.btnOpenTutorial.addEventListener("click", () => openPanel("tutorial"));
+      els.btnEmptyTutorial.addEventListener("click", () => openPanel("tutorial"));
+      els.btnOpenSettings.addEventListener("click", () => openPanel("settings"));
+      els.sidebarStorage.addEventListener("click", () => openPanel("settings"));
+      els.btnCloseTutorial.addEventListener("click", closePanel);
+      els.btnCloseSettings.addEventListener("click", closePanel);
+
+      els.btnToggleSelect.addEventListener("click", () => {
+        if (state.selectMode) exitSelectMode();
+        else enterSelectMode();
+      });
+      els.btnCancelSelect.addEventListener("click", () => exitSelectMode());
+      els.btnSelectAll.addEventListener("click", toggleSelectAll);
+      els.btnDeleteSelected.addEventListener("click", deleteSelectedNotes);
+
+      els.inputTitle.addEventListener("input", handleEditorInput);
+      els.inputBody.addEventListener("input", handleEditorInput);
+      els.btnPin.addEventListener("click", togglePin);
+      els.btnCopy.addEventListener("click", copyCurrentNote);
+      els.btnDelete.addEventListener("click", deleteCurrentNote);
+
+      els.btnExportJson.addEventListener("click", () => exportNotes("json"));
+      els.btnExportTxt.addEventListener("click", () => exportNotes("txt"));
+      els.btnDeleteAllNotes.addEventListener("click", deleteAllNotesFlow);
+      els.btnDeleteAccount.addEventListener("click", deleteAccountFlow);
+
+      els.searchInput.addEventListener("input", (e) => {
+        state.searchQuery = e.target.value;
+        renderNoteList();
+      });
+
+      els.backButtons.forEach((btn) => btn.addEventListener("click", goBackToList));
+
+      // モーダル
+      els.modalConfirm.addEventListener("click", runModalAction);
+      els.modalCancel.addEventListener("click", () => {
+        if (!modalState.busy) closeModal();
+      });
+      els.modalBackdrop.addEventListener("click", (e) => {
+        if (e.target === els.modalBackdrop && !modalState.busy) closeModal();
+      });
+      els.modalInput.addEventListener("input", () => {
+        els.modalConfirm.disabled = els.modalInput.value.trim() !== modalState.requireText;
+      });
+      els.modalInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && !e.isComposing && !els.modalConfirm.disabled) runModalAction();
+      });
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && modalState.open && !modalState.busy) closeModal();
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
+          e.preventDefault();
+          flushPendingSave();
+        }
+      });
+
+      // 保存待ちの内容を、タブを閉じる・隠すときにできるだけ送る
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "hidden") flushPendingSave();
+      });
+      window.addEventListener("pagehide", () => flushPendingSave());
+      window.addEventListener("beforeunload", (e) => {
+        if (state.pendingNote) {
+          flushPendingSave();
+          e.preventDefault();
+          e.returnValue = "";
+        }
+      });
+
+      window.addEventListener("offline", () => showToast("オフラインです。復帰後に自動で同期されます"));
+      window.addEventListener("online", () => showToast("オンラインに戻りました"));
+
+      window.addEventListener("resize", () => {
+        // PCサイズに広げたとき、スマホ用の重なり表示を解除
+        if (!isMobileLayout()) showMobileDetail(false);
+      });
     }
 
     function init() {
@@ -1471,38 +2360,20 @@
         els.loginScreen.style.display = "none";
         els.appContainer.classList.add("authenticated");
         els.userEmailLabel.textContent = user.email || "Googleアカウント";
+        els.settingsEmail.textContent = user.email || "Googleアカウント";
 
         try {
-          await StorageService.ensureInitialNoteIfEmpty(user.uid);
+          await StorageService.ensureWelcomeNote(user);
         } catch (err) {
           console.error("Initial note error:", err);
           setSaveStatus("error", formatSaveError(err));
         }
 
-        if (typeof state.unsubscribeNotes === "function") {
-          state.unsubscribeNotes();
-        }
+        // 認証待ちの間にログアウト/別アカウントになっていないか確認
+        if (!state.user || state.user.uid !== user.uid) return;
 
-        state.unsubscribeNotes = StorageService.subscribeNotes(
-          user.uid,
-          (cloudNotes) => {
-            state.notes = cloudNotes;
-            cloudNotes.forEach((n) => {
-              state.lastSavedSignature.set(n.id, getNoteSignature(n));
-            });
-
-            if (window.innerWidth > 768 && state.notes.length > 0 && !state.activeNoteId && !state.isTutorialOpen) {
-              const sorted = sortNotes(state.notes);
-              state.activeNoteId = sorted[0].id;
-            }
-
-            renderNoteList();
-            updateRightPaneVisibility();
-          },
-          (err) => {
-            setSaveStatus("error", formatSaveError(err));
-          }
-        );
+        startNotesSubscription(user);
+        updateStorageDisplay();
       });
     }
 

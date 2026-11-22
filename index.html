@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Mellow Note - シンプルなメモ帳</title>
+  <!-- 鉛筆絵文字ファビコン（✏️） -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✏️</text></svg>">
   <!-- 落ち着いた丸みのあるGoogleフォント -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -722,7 +724,7 @@
   <!-- Googleログイン画面 -->
   <div class="login-screen" id="loginScreen">
     <div class="login-card">
-      <div class="login-icon">✎</div>
+      <div class="login-icon">✏️</div>
       <h1>Mellow Note</h1>
       <p>
         Googleアカウントでログインすると、<br>
@@ -739,7 +741,7 @@
     <aside class="sidebar">
       <div class="sidebar-header">
         <div class="app-title">
-          <span class="app-title-icon">✎</span>
+          <span class="app-title-icon">✏️</span>
           <span>Mellow Note</span>
         </div>
         <div class="header-actions">
@@ -907,19 +909,33 @@
      * Firebase 設定（あなたのプロジェクトの値に書き換えてください）
      * =========================================================================
      */
-    const FIREBASE_CONFIG = {
-      apiKey: "AIzaSyASXMdTe_zIB-AfLWGZpsEoj09EJnkxvcw",
-      authDomain: "memo-72173.firebaseapp.com",
-      projectId: "memo-72173",
-      storageBucket: "memo-72173.firebasestorage.app",
-      messagingSenderId: "274624828586",
-      appId: "1:274624828586:web:5d9087111af0c05c2d2cd3"
-    };
+    const firebaseConfig = {
+  apiKey: "AIzaSyASXMdTe_zIB-AfLWGZpsEoj09EJnkxvcw",
+  authDomain: "memo-72173.firebaseapp.com",
+  projectId: "memo-72173",
+  storageBucket: "memo-72173.firebasestorage.app",
+  messagingSenderId: "274624828586",
+  appId: "1:274624828586:web:5d9087111af0c05c2d2cd3"
+};
 
     const app = initializeApp(FIREBASE_CONFIG);
     const auth = getAuth(app);
     const db = getFirestore(app);
     const googleProvider = new GoogleAuthProvider();
+
+    function formatSaveError(err) {
+      const code = err && err.code ? String(err.code) : "";
+      if (code.includes("permission-denied")) {
+        return "保存失敗（ルール確認）";
+      }
+      if (code.includes("unavailable") || code.includes("network")) {
+        return "保存失敗（通信確認）";
+      }
+      if (code) {
+        return `保存失敗 (${code.replace("firestore/", "")})`;
+      }
+      return "保存失敗";
+    }
 
     /**
      * データ保存層（StorageService）
@@ -1060,7 +1076,7 @@
         els.saveStatusText.textContent = customText || "保存中...";
       } else if (status === "error") {
         els.statusDot.classList.add("error");
-        els.saveStatusText.textContent = customText || "同期エラー";
+        els.saveStatusText.textContent = customText || "保存失敗";
       } else {
         els.saveStatusText.textContent = customText || "同期済み";
       }
@@ -1109,7 +1125,9 @@
         els.editorDateInfo.textContent = `最終更新: ${formatDate(note.updatedAt)}`;
         updateCharCount(els.inputBody.value);
         updatePinButton(Boolean(note.isPinned));
-        setSaveStatus("saved");
+        if (!els.statusDot.classList.contains("error")) {
+          setSaveStatus("saved");
+        }
       } else {
         els.editorView.style.display = "none";
         els.noNoteView.style.display = "flex";
@@ -1218,7 +1236,7 @@
         setSaveStatus("saved");
       } catch (err) {
         console.error(err);
-        setSaveStatus("error", "保存失敗");
+        setSaveStatus("error", formatSaveError(err));
       }
     }
 
@@ -1249,7 +1267,7 @@
           setSaveStatus("saved");
         } catch (err) {
           console.error(err);
-          setSaveStatus("error", "保存失敗");
+          setSaveStatus("error", formatSaveError(err));
         }
       }, 400);
     }
@@ -1271,7 +1289,7 @@
         setSaveStatus("saved");
       } catch (err) {
         console.error(err);
-        setSaveStatus("error", "保存失敗");
+        setSaveStatus("error", formatSaveError(err));
       }
     }
 
@@ -1298,7 +1316,7 @@
         await StorageService.deleteNote(state.user.uid, targetId);
       } catch (err) {
         console.error(err);
-        setSaveStatus("error", "削除失敗");
+        setSaveStatus("error", formatSaveError(err));
       }
     }
 
@@ -1309,7 +1327,7 @@
           await signInWithPopup(auth, googleProvider);
         } catch (err) {
           console.error("Google login error:", err);
-          els.loginError.textContent = "ログインに失敗しました。設定やドメインをご確認ください。";
+          els.loginError.textContent = "ログインに失敗しました。設定や承認済みドメインをご確認ください。";
         }
       });
 
@@ -1378,7 +1396,7 @@
           await StorageService.ensureInitialNoteIfEmpty(user.uid);
         } catch (err) {
           console.error("Initial note error:", err);
-          setSaveStatus("error", "接続エラー");
+          setSaveStatus("error", formatSaveError(err));
         }
 
         if (typeof state.unsubscribeNotes === "function") {
@@ -1386,6 +1404,7 @@
         }
 
         state.unsubscribeNotes = StorageService.subscribeNotes(
+          user.uid,
           (cloudNotes) => {
             state.notes = cloudNotes;
             cloudNotes.forEach((n) => {
@@ -1400,8 +1419,8 @@
             renderNoteList();
             updateRightPaneVisibility();
           },
-          () => {
-            setSaveStatus("error", "同期エラー");
+          (err) => {
+            setSaveStatus("error", formatSaveError(err));
           }
         );
       });

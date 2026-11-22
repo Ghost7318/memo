@@ -3,9 +3,89 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Mellow Note">
+  <meta name="theme-color" content="#FAF8F5">
   <title>Mellow Note - シンプルなメモ帳</title>
-  <!-- 鉛筆絵文字ファビコン（✏️） -->
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✏️</text></svg>">
+
+  <!-- ブラウザタブ用ファビコン（✏️） -->
+  <link id="dynamicFavicon" rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✏️</text></svg>">
+  <!-- スマホホーム画面追加用アイコン（起動時に高解像度PNGへ自動変換） -->
+  <link id="appleTouchIcon" rel="apple-touch-icon" sizes="180x180" href="">
+  <link id="appManifest" rel="manifest" href="">
+
+  <!-- ホーム画面アイコン（✏️）のPNG・マニフェスト自動生成 -->
+  <script>
+    (function setupEmojiAppIcons() {
+      function createEmojiIconDataUrl(size) {
+        const canvas = document.createElement("canvas");
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext("2d");
+
+        // 落ち着いたラテアイボリーの背景
+        ctx.fillStyle = "#F4EAE1";
+        ctx.fillRect(0, 0, size, size);
+
+        // 内側にやわらかい枠線
+        const inset = Math.round(size * 0.06);
+        const radius = Math.round(size * 0.22);
+        const w = size - inset * 2;
+        const h = size - inset * 2;
+
+        ctx.beginPath();
+        ctx.moveTo(inset + radius, inset);
+        ctx.arcTo(inset + w, inset, inset + w, inset + h, radius);
+        ctx.arcTo(inset + w, inset + h, inset, inset + h, radius);
+        ctx.arcTo(inset, inset + h, inset, inset, radius);
+        ctx.arcTo(inset, inset, inset + w, inset, radius);
+        ctx.closePath();
+        ctx.fillStyle = "#FAF8F5";
+        ctx.fill();
+        ctx.lineWidth = Math.max(2, Math.round(size * 0.02));
+        ctx.strokeStyle = "#E6DFD5";
+        ctx.stroke();
+
+        // 中央に鉛筆の絵文字（✏️）を描画
+        ctx.font = `${Math.round(size * 0.56)}px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif`;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("✏️", size / 2, size / 2 + size * 0.03);
+
+        return canvas.toDataURL("image/png");
+      }
+
+      try {
+        const icon180 = createEmojiIconDataUrl(180);
+        const icon512 = createEmojiIconDataUrl(512);
+
+        const appleLink = document.getElementById("appleTouchIcon");
+        if (appleLink) appleLink.href = icon180;
+
+        const manifestData = {
+          name: "Mellow Note",
+          short_name: "Mellow Note",
+          start_url: ".",
+          display: "standalone",
+          background_color: "#FAF8F5",
+          theme_color: "#FAF8F5",
+          icons: [
+            { src: icon180, sizes: "180x180", type: "image/png" },
+            { src: icon512, sizes: "512x512", type: "image/png" }
+          ]
+        };
+
+        const manifestBlob = new Blob([JSON.stringify(manifestData)], { type: "application/manifest+json" });
+        const manifestUrl = URL.createObjectURL(manifestBlob);
+        const manifestLink = document.getElementById("appManifest");
+        if (manifestLink) manifestLink.href = manifestUrl;
+      } catch (e) {
+        console.warn("Icon generation fallback:", e);
+      }
+    })();
+  </script>
+
   <!-- 落ち着いた丸みのあるGoogleフォント -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -909,14 +989,14 @@
      * Firebase 設定（あなたのプロジェクトの値に書き換えてください）
      * =========================================================================
      */
-    const firebaseConfig = {
-  apiKey: "AIzaSyASXMdTe_zIB-AfLWGZpsEoj09EJnkxvcw",
-  authDomain: "memo-72173.firebaseapp.com",
-  projectId: "memo-72173",
-  storageBucket: "memo-72173.firebasestorage.app",
-  messagingSenderId: "274624828586",
-  appId: "1:274624828586:web:5d9087111af0c05c2d2cd3"
-};
+    const FIREBASE_CONFIG = {
+      apiKey: "AIzaSyASXMdTe_zIB-AfLWGZpsEoj09EJnkxvcw",
+      authDomain: "memo-72173.firebaseapp.com",
+      projectId: "memo-72173",
+      storageBucket: "memo-72173.firebasestorage.app",
+      messagingSenderId: "274624828586",
+      appId: "1:274624828586:web:5d9087111af0c05c2d2cd3"
+    };
 
     const app = initializeApp(FIREBASE_CONFIG);
     const auth = getAuth(app);

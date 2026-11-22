@@ -47,14 +47,96 @@
       justify-content: center;
     }
 
+    /* ログイン画面 */
+    .login-screen {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background-color: var(--bg-main);
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 420px;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 36px 28px;
+      text-align: center;
+      box-shadow: 0 8px 24px rgba(74, 66, 56, 0.05);
+    }
+
+    .login-icon {
+      width: 60px;
+      height: 60px;
+      margin: 0 auto 16px;
+      border-radius: 18px;
+      background-color: var(--accent-soft);
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.7rem;
+    }
+
+    .login-card h1 {
+      font-size: 1.45rem;
+      margin-bottom: 10px;
+      color: var(--text-main);
+    }
+
+    .login-card p {
+      font-size: 0.92rem;
+      line-height: 1.75;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+
+    .btn-google {
+      width: 100%;
+      background-color: var(--accent);
+      color: #FFFFFF;
+      border: none;
+      border-radius: var(--radius-md);
+      padding: 13px 18px;
+      font-family: inherit;
+      font-size: 0.98rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 3px 10px rgba(200, 157, 124, 0.3);
+      transition: background-color 0.2s, transform 0.1s;
+    }
+
+    .btn-google:hover {
+      background-color: var(--accent-hover);
+    }
+
+    .btn-google:active {
+      transform: scale(0.98);
+    }
+
+    .login-error {
+      margin-top: 14px;
+      font-size: 0.84rem;
+      color: var(--danger);
+      min-height: 1.2em;
+    }
+
     /* アプリ全体のコンテナ */
     .app-container {
       width: 100%;
       max-width: 1200px;
       height: 100%;
-      display: flex;
+      display: none;
       background-color: var(--bg-main);
       box-shadow: 0 0 30px rgba(74, 66, 56, 0.04);
+    }
+
+    .app-container.authenticated {
+      display: flex;
     }
 
     /* ================= サイドバー（メモ一覧） ================= */
@@ -69,7 +151,7 @@
     }
 
     .sidebar-header {
-      padding: 20px 20px 14px;
+      padding: 20px 20px 10px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -148,6 +230,44 @@
 
     .btn-new:active {
       transform: scale(0.97);
+    }
+
+    /* ログイン中アカウントバー */
+    .user-bar {
+      margin: 0 20px 12px;
+      padding: 8px 12px;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .user-email {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: var(--text-main);
+      font-weight: 500;
+    }
+
+    .btn-logout {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 0.76rem;
+      cursor: pointer;
+      flex-shrink: 0;
+      text-decoration: underline;
+    }
+
+    .btn-logout:hover {
+      color: var(--text-main);
     }
 
     /* 検索ボックス */
@@ -346,6 +466,10 @@
 
     .status-dot.saving {
       background-color: var(--accent);
+    }
+
+    .status-dot.error {
+      background-color: var(--danger);
     }
 
     .toolbar-right {
@@ -595,6 +719,21 @@
 </head>
 <body>
 
+  <!-- Googleログイン画面 -->
+  <div class="login-screen" id="loginScreen">
+    <div class="login-card">
+      <div class="login-icon">✎</div>
+      <h1>Mellow Note</h1>
+      <p>
+        Googleアカウントでログインすると、<br>
+        アカウントごとのメモを保存・同期できます。
+      </p>
+      <button class="btn-google" id="btnGoogleLogin">Googleでログイン</button>
+      <div class="login-error" id="loginError"></div>
+    </div>
+  </div>
+
+  <!-- メインアプリ画面（ログイン後に表示） -->
   <div class="app-container" id="appContainer">
     <!-- 左ペイン：メモ一覧 -->
     <aside class="sidebar">
@@ -609,6 +748,11 @@
             <span>＋</span> 新規
           </button>
         </div>
+      </div>
+
+      <div class="user-bar">
+        <span class="user-email" id="userEmailLabel">ログイン中</span>
+        <button class="btn-logout" id="btnLogout">ログアウト</button>
       </div>
 
       <div class="search-box">
@@ -638,7 +782,7 @@
             <button class="btn-back btn-back-to-list">← 一覧へ</button>
             <div class="save-status">
               <span class="status-dot" id="statusDot"></span>
-              <span id="saveStatusText">保存済み</span>
+              <span id="saveStatusText">同期済み</span>
             </div>
           </div>
 
@@ -696,7 +840,7 @@
             <p>
               左上の「＋ 新規」ボタンを押すと新しいメモが作られます。
               一番上の欄にタイトルを、広いスペースに本文を入力してください。
-              文字を入力すると自動で保存され、画面左上の表示が「保存済み」になります。
+              文字を入力すると自動で保存され、画面左上の表示が「同期済み」になります。
             </p>
           </div>
 
@@ -739,112 +883,169 @@
     </main>
   </div>
 
-  <script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+    import {
+      getAuth,
+      GoogleAuthProvider,
+      signInWithPopup,
+      signOut,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+    import {
+      getFirestore,
+      collection,
+      doc,
+      setDoc,
+      deleteDoc,
+      onSnapshot,
+      getDocs
+    } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+
+    /**
+     * =========================================================================
+     * Firebase 設定（あなたのプロジェクトの値に書き換えてください）
+     * =========================================================================
+     */
+    const FIREBASE_CONFIG = {
+      apiKey: "AIzaSyASXMdTe_zIB-AfLWGZpsEoj09EJnkxvcw",
+      authDomain: "memo-72173.firebaseapp.com",
+      projectId: "memo-72173",
+      storageBucket: "memo-72173.firebasestorage.app",
+      messagingSenderId: "274624828586",
+      appId: "1:274624828586:web:5d9087111af0c05c2d2cd3"
+    };
+
+    const app = initializeApp(FIREBASE_CONFIG);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const googleProvider = new GoogleAuthProvider();
+
     /**
      * データ保存層（StorageService）
-     * 将来Firestoreへ差し替える際は、このオブジェクトのメソッドを置き換えます。
+     * ログインしたユーザー（uid）ごとに users/{uid}/notes へ保存します。
      */
     const StorageService = {
-      STORAGE_KEY: 'mellow_note_data_v1',
-
-      async loadNotes() {
-        const raw = localStorage.getItem(this.STORAGE_KEY);
-        if (!raw) {
-          const initialNotes = [
-            {
-              id: 'welcome-note-1',
-              title: '最初のメモ ☕',
-              body: '気軽にメモを書いてみてください。\n左上の「使い方」から基本操作も確認できます。',
-              isPinned: true,
-              createdAt: Date.now(),
-              updatedAt: Date.now()
-            }
-          ];
-          localStorage.setItem(this.STORAGE_KEY, JSON.stringify(initialNotes));
-          return initialNotes;
-        }
-        return JSON.parse(raw);
+      getNotesCollectionRef(uid) {
+        return collection(db, "users", uid, "notes");
       },
 
-      async saveNote(note) {
-        const notes = await this.loadNotes();
-        const index = notes.findIndex(n => n.id === note.id);
-        if (index > -1) {
-          notes[index] = note;
-        } else {
-          notes.unshift(note);
+      getNoteDocRef(uid, noteId) {
+        return doc(db, "users", uid, "notes", noteId);
+      },
+
+      async ensureInitialNoteIfEmpty(uid) {
+        const colRef = this.getNotesCollectionRef(uid);
+        const snap = await getDocs(colRef);
+        if (snap.empty) {
+          const welcomeNote = {
+            id: "welcome-note-1",
+            title: "最初のメモ ☕",
+            body: "気軽にメモを書いてみてください。\n左上の「使い方」から基本操作も確認できます。",
+            isPinned: true,
+            createdAt: Date.now(),
+            updatedAt: Date.now()
+          };
+          await setDoc(this.getNoteDocRef(uid, welcomeNote.id), welcomeNote);
         }
-        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(notes));
+      },
+
+      subscribeNotes(uid, onData, onError) {
+        return onSnapshot(
+          this.getNotesCollectionRef(uid),
+          (snapshot) => {
+            const notes = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+            onData(notes);
+          },
+          (error) => {
+            console.error("Firestore subscription error:", error);
+            if (onError) onError(error);
+          }
+        );
+      },
+
+      async saveNote(uid, note) {
+        await setDoc(this.getNoteDocRef(uid, note.id), note, { merge: true });
         return note;
       },
 
-      async deleteNote(noteId) {
-        const notes = await this.loadNotes();
-        const filtered = notes.filter(n => n.id !== noteId);
-        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(filtered));
+      async deleteNote(uid, noteId) {
+        await deleteDoc(this.getNoteDocRef(uid, noteId));
       }
     };
 
     const state = {
+      user: null,
       notes: [],
       activeNoteId: null,
       isTutorialOpen: false,
-      searchQuery: '',
-      saveTimer: null
+      searchQuery: "",
+      saveTimer: null,
+      unsubscribeNotes: null,
+      lastSavedSignature: new Map()
     };
 
     const els = {
-      appContainer: document.getElementById('appContainer'),
-      noteList: document.getElementById('noteList'),
-      noteCountLabel: document.getElementById('noteCountLabel'),
-      totalCharSummary: document.getElementById('totalCharSummary'),
-      searchInput: document.getElementById('searchInput'),
-      btnNewNote: document.getElementById('btnNewNote'),
-      btnOpenTutorial: document.getElementById('btnOpenTutorial'),
-      btnEmptyTutorial: document.getElementById('btnEmptyTutorial'),
-      btnCloseTutorial: document.getElementById('btnCloseTutorial'),
-      btnStartFromTutorial: document.getElementById('btnStartFromTutorial'),
-      backButtons: document.querySelectorAll('.btn-back-to-list'),
-      editorView: document.getElementById('editorView'),
-      noNoteView: document.getElementById('noNoteView'),
-      tutorialView: document.getElementById('tutorialView'),
-      statusDot: document.getElementById('statusDot'),
-      saveStatusText: document.getElementById('saveStatusText'),
-      btnPin: document.getElementById('btnPin'),
-      pinBtnText: document.getElementById('pinBtnText'),
-      btnDelete: document.getElementById('btnDelete'),
-      editorDateInfo: document.getElementById('editorDateInfo'),
-      inputTitle: document.getElementById('inputTitle'),
-      inputBody: document.getElementById('inputBody'),
-      charCount: document.getElementById('charCount')
+      loginScreen: document.getElementById("loginScreen"),
+      btnGoogleLogin: document.getElementById("btnGoogleLogin"),
+      loginError: document.getElementById("loginError"),
+      appContainer: document.getElementById("appContainer"),
+      userEmailLabel: document.getElementById("userEmailLabel"),
+      btnLogout: document.getElementById("btnLogout"),
+      noteList: document.getElementById("noteList"),
+      noteCountLabel: document.getElementById("noteCountLabel"),
+      totalCharSummary: document.getElementById("totalCharSummary"),
+      searchInput: document.getElementById("searchInput"),
+      btnNewNote: document.getElementById("btnNewNote"),
+      btnOpenTutorial: document.getElementById("btnOpenTutorial"),
+      btnEmptyTutorial: document.getElementById("btnEmptyTutorial"),
+      btnCloseTutorial: document.getElementById("btnCloseTutorial"),
+      btnStartFromTutorial: document.getElementById("btnStartFromTutorial"),
+      backButtons: document.querySelectorAll(".btn-back-to-list"),
+      editorView: document.getElementById("editorView"),
+      noNoteView: document.getElementById("noNoteView"),
+      tutorialView: document.getElementById("tutorialView"),
+      statusDot: document.getElementById("statusDot"),
+      saveStatusText: document.getElementById("saveStatusText"),
+      btnPin: document.getElementById("btnPin"),
+      pinBtnText: document.getElementById("pinBtnText"),
+      btnDelete: document.getElementById("btnDelete"),
+      editorDateInfo: document.getElementById("editorDateInfo"),
+      inputTitle: document.getElementById("inputTitle"),
+      inputBody: document.getElementById("inputBody"),
+      charCount: document.getElementById("charCount")
     };
 
+    function getNoteSignature(note) {
+      return `${note.title ?? ""}|||${note.body ?? ""}|||${Boolean(note.isPinned)}`;
+    }
+
     function formatDate(timestamp) {
-      const d = new Date(timestamp);
+      const d = new Date(timestamp || Date.now());
       const y = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, '0');
-      const day = String(d.getDate()).padStart(2, '0');
-      const h = String(d.getHours()).padStart(2, '0');
-      const min = String(d.getMinutes()).padStart(2, '0');
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      const h = String(d.getHours()).padStart(2, "0");
+      const min = String(d.getMinutes()).padStart(2, "0");
       return `${y}/${m}/${day} ${h}:${min}`;
     }
 
     function sortNotes(notes) {
       return [...notes].sort((a, b) => {
-        if (a.isPinned !== b.isPinned) {
+        if (Boolean(a.isPinned) !== Boolean(b.isPinned)) {
           return a.isPinned ? -1 : 1;
         }
-        return b.updatedAt - a.updatedAt;
+        return (b.updatedAt || 0) - (a.updatedAt || 0);
       });
     }
 
     function escapeHtml(str) {
-      return str
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
     }
 
     function updateSummaryStats() {
@@ -852,31 +1053,66 @@
       els.totalCharSummary.textContent = `合計 ${totalChars.toLocaleString()} 文字`;
     }
 
+    function setSaveStatus(status, customText = "") {
+      els.statusDot.classList.remove("saving", "error");
+      if (status === "saving") {
+        els.statusDot.classList.add("saving");
+        els.saveStatusText.textContent = customText || "保存中...";
+      } else if (status === "error") {
+        els.statusDot.classList.add("error");
+        els.saveStatusText.textContent = customText || "同期エラー";
+      } else {
+        els.saveStatusText.textContent = customText || "同期済み";
+      }
+    }
+
+    function updatePinButton(isPinned) {
+      if (isPinned) {
+        els.btnPin.classList.add("pinned");
+        els.pinBtnText.textContent = "固定中";
+      } else {
+        els.btnPin.classList.remove("pinned");
+        els.pinBtnText.textContent = "ピン留め";
+      }
+    }
+
+    function updateCharCount(text) {
+      const count = (text || "").length;
+      els.charCount.textContent = `${count.toLocaleString()} 文字`;
+    }
+
     function updateRightPaneVisibility() {
-      els.btnOpenTutorial.classList.toggle('active', state.isTutorialOpen);
+      els.btnOpenTutorial.classList.toggle("active", state.isTutorialOpen);
 
       if (state.isTutorialOpen) {
-        els.editorView.style.display = 'none';
-        els.noNoteView.style.display = 'none';
-        els.tutorialView.style.display = 'flex';
+        els.editorView.style.display = "none";
+        els.noNoteView.style.display = "none";
+        els.tutorialView.style.display = "flex";
         return;
       }
 
-      els.tutorialView.style.display = 'none';
-      const note = state.notes.find(n => n.id === state.activeNoteId);
+      els.tutorialView.style.display = "none";
+      const note = state.notes.find((n) => n.id === state.activeNoteId);
 
       if (note) {
-        els.noNoteView.style.display = 'none';
-        els.editorView.style.display = 'flex';
-        els.inputTitle.value = note.title;
-        els.inputBody.value = note.body;
+        els.noNoteView.style.display = "none";
+        els.editorView.style.display = "flex";
+
+        const isFocusedOnEditor =
+          document.activeElement === els.inputTitle || document.activeElement === els.inputBody;
+
+        if (!isFocusedOnEditor) {
+          els.inputTitle.value = note.title || "";
+          els.inputBody.value = note.body || "";
+        }
+
         els.editorDateInfo.textContent = `最終更新: ${formatDate(note.updatedAt)}`;
-        updateCharCount(note.body);
-        updatePinButton(note.isPinned);
-        setSaveStatus('saved');
+        updateCharCount(els.inputBody.value);
+        updatePinButton(Boolean(note.isPinned));
+        setSaveStatus("saved");
       } else {
-        els.editorView.style.display = 'none';
-        els.noNoteView.style.display = 'flex';
+        els.editorView.style.display = "none";
+        els.noNoteView.style.display = "flex";
       }
     }
 
@@ -885,14 +1121,14 @@
       state.activeNoteId = null;
       renderNoteList();
       updateRightPaneVisibility();
-      els.appContainer.classList.add('mobile-detail-open');
+      els.appContainer.classList.add("mobile-detail-open");
     }
 
     function closeTutorial() {
       state.isTutorialOpen = false;
       updateRightPaneVisibility();
       if (window.innerWidth <= 768) {
-        els.appContainer.classList.remove('mobile-detail-open');
+        els.appContainer.classList.remove("mobile-detail-open");
       }
     }
 
@@ -900,9 +1136,10 @@
       const query = state.searchQuery.trim().toLowerCase();
       const sorted = sortNotes(state.notes);
       const filtered = query
-        ? sorted.filter(n =>
-            (n.title && n.title.toLowerCase().includes(query)) ||
-            (n.body && n.body.toLowerCase().includes(query))
+        ? sorted.filter(
+            (n) =>
+              (n.title && n.title.toLowerCase().includes(query)) ||
+              (n.body && n.body.toLowerCase().includes(query))
           )
         : sorted;
 
@@ -911,34 +1148,38 @@
         : `すべてのメモ (${state.notes.length}件)`;
 
       updateSummaryStats();
-      els.noteList.innerHTML = '';
+      els.noteList.innerHTML = "";
 
       if (filtered.length === 0) {
         els.noteList.innerHTML = `
           <div class="empty-list">
-            ${query ? '一致するメモが見つかりませんでした。' : 'メモがまだありません。<br>右上の「＋ 新規」から作成できます。'}
+            ${
+              query
+                ? "一致するメモが見つかりませんでした。"
+                : "メモがまだありません。<br>右上の「＋ 新規」から作成できます。"
+            }
           </div>
         `;
         return;
       }
 
-      filtered.forEach(note => {
-        const card = document.createElement('div');
-        card.className = `note-card ${!state.isTutorialOpen && note.id === state.activeNoteId ? 'active' : ''}`;
+      filtered.forEach((note) => {
+        const card = document.createElement("div");
+        card.className = `note-card ${!state.isTutorialOpen && note.id === state.activeNoteId ? "active" : ""}`;
 
-        const displayTitle = note.title.trim() || '無題のメモ';
-        const displayPreview = note.body.trim().replace(/\n/g, ' ') || '本文なし';
+        const displayTitle = (note.title || "").trim() || "無題のメモ";
+        const displayPreview = (note.body || "").trim().replace(/\n/g, " ") || "本文なし";
 
         card.innerHTML = `
           <div class="note-card-header">
             <div class="note-card-title">${escapeHtml(displayTitle)}</div>
-            ${note.isPinned ? '<span class="pin-badge" title="ピン留め中">📌</span>' : ''}
+            ${note.isPinned ? '<span class="pin-badge" title="ピン留め中">📌</span>' : ""}
           </div>
           <div class="note-card-preview">${escapeHtml(displayPreview)}</div>
           <div class="note-card-date">${formatDate(note.updatedAt)}</div>
         `;
 
-        card.addEventListener('click', () => selectNote(note.id, true));
+        card.addEventListener("click", () => selectNote(note.id, true));
         els.noteList.appendChild(card);
       });
     }
@@ -950,53 +1191,40 @@
       updateRightPaneVisibility();
 
       if (isMobileOpen && noteId) {
-        els.appContainer.classList.add('mobile-detail-open');
-      }
-    }
-
-    function updatePinButton(isPinned) {
-      if (isPinned) {
-        els.btnPin.classList.add('pinned');
-        els.pinBtnText.textContent = '固定中';
-      } else {
-        els.btnPin.classList.remove('pinned');
-        els.pinBtnText.textContent = 'ピン留め';
-      }
-    }
-
-    function updateCharCount(text) {
-      els.charCount.textContent = `${text.length.toLocaleString()} 文字`;
-    }
-
-    function setSaveStatus(status) {
-      if (status === 'saving') {
-        els.statusDot.classList.add('saving');
-        els.saveStatusText.textContent = '保存中...';
-      } else {
-        els.statusDot.classList.remove('saving');
-        els.saveStatusText.textContent = '保存済み';
+        els.appContainer.classList.add("mobile-detail-open");
       }
     }
 
     async function createNewNote() {
+      if (!state.user) return;
       const now = Date.now();
       const newNote = {
-        id: 'note-' + now + '-' + Math.random().toString(36).substring(2, 7),
-        title: '',
-        body: '',
+        id: "note-" + now + "-" + Math.random().toString(36).substring(2, 7),
+        title: "",
+        body: "",
         isPinned: false,
         createdAt: now,
         updatedAt: now
       };
 
-      await StorageService.saveNote(newNote);
       state.notes.unshift(newNote);
       selectNote(newNote.id, true);
       els.inputTitle.focus();
+
+      try {
+        setSaveStatus("saving");
+        await StorageService.saveNote(state.user.uid, newNote);
+        state.lastSavedSignature.set(newNote.id, getNoteSignature(newNote));
+        setSaveStatus("saved");
+      } catch (err) {
+        console.error(err);
+        setSaveStatus("error", "保存失敗");
+      }
     }
 
     function handleEditorInput() {
-      const note = state.notes.find(n => n.id === state.activeNoteId);
+      if (!state.user) return;
+      const note = state.notes.find((n) => n.id === state.activeNoteId);
       if (!note) return;
 
       note.title = els.inputTitle.value;
@@ -1004,67 +1232,111 @@
       note.updatedAt = Date.now();
 
       updateCharCount(note.body);
-      setSaveStatus('saving');
+      setSaveStatus("saving");
       renderNoteList();
 
       clearTimeout(state.saveTimer);
       state.saveTimer = setTimeout(async () => {
-        await StorageService.saveNote(note);
-        els.editorDateInfo.textContent = `最終更新: ${formatDate(note.updatedAt)}`;
-        setSaveStatus('saved');
+        const sig = getNoteSignature(note);
+        if (state.lastSavedSignature.get(note.id) === sig) {
+          setSaveStatus("saved");
+          return;
+        }
+        try {
+          await StorageService.saveNote(state.user.uid, note);
+          state.lastSavedSignature.set(note.id, sig);
+          els.editorDateInfo.textContent = `最終更新: ${formatDate(note.updatedAt)}`;
+          setSaveStatus("saved");
+        } catch (err) {
+          console.error(err);
+          setSaveStatus("error", "保存失敗");
+        }
       }, 400);
     }
 
     async function togglePin() {
-      const note = state.notes.find(n => n.id === state.activeNoteId);
+      if (!state.user) return;
+      const note = state.notes.find((n) => n.id === state.activeNoteId);
       if (!note) return;
 
       note.isPinned = !note.isPinned;
       note.updatedAt = Date.now();
-      await StorageService.saveNote(note);
-
       updatePinButton(note.isPinned);
       renderNoteList();
+
+      try {
+        setSaveStatus("saving");
+        await StorageService.saveNote(state.user.uid, note);
+        state.lastSavedSignature.set(note.id, getNoteSignature(note));
+        setSaveStatus("saved");
+      } catch (err) {
+        console.error(err);
+        setSaveStatus("error", "保存失敗");
+      }
     }
 
     async function deleteCurrentNote() {
-      const note = state.notes.find(n => n.id === state.activeNoteId);
+      if (!state.user) return;
+      const note = state.notes.find((n) => n.id === state.activeNoteId);
       if (!note) return;
 
-      const title = note.title.trim() || '無題のメモ';
+      const title = (note.title || "").trim() || "無題のメモ";
       if (!confirm(`「${title}」を削除しますか？\nこの操作は取り消せません。`)) {
         return;
       }
 
-      await StorageService.deleteNote(note.id);
-      state.notes = state.notes.filter(n => n.id !== note.id);
+      const targetId = note.id;
+      state.notes = state.notes.filter((n) => n.id !== targetId);
+      state.lastSavedSignature.delete(targetId);
       state.activeNoteId = null;
 
-      els.appContainer.classList.remove('mobile-detail-open');
+      els.appContainer.classList.remove("mobile-detail-open");
       renderNoteList();
       updateRightPaneVisibility();
+
+      try {
+        await StorageService.deleteNote(state.user.uid, targetId);
+      } catch (err) {
+        console.error(err);
+        setSaveStatus("error", "削除失敗");
+      }
     }
 
     function bindEvents() {
-      els.btnNewNote.addEventListener('click', createNewNote);
-      els.btnOpenTutorial.addEventListener('click', openTutorial);
-      els.btnEmptyTutorial.addEventListener('click', openTutorial);
-      els.btnCloseTutorial.addEventListener('click', closeTutorial);
-      els.btnStartFromTutorial.addEventListener('click', createNewNote);
+      els.btnGoogleLogin.addEventListener("click", async () => {
+        els.loginError.textContent = "";
+        try {
+          await signInWithPopup(auth, googleProvider);
+        } catch (err) {
+          console.error("Google login error:", err);
+          els.loginError.textContent = "ログインに失敗しました。設定やドメインをご確認ください。";
+        }
+      });
 
-      els.inputTitle.addEventListener('input', handleEditorInput);
-      els.inputBody.addEventListener('input', handleEditorInput);
-      els.btnPin.addEventListener('click', togglePin);
-      els.btnDelete.addEventListener('click', deleteCurrentNote);
+      els.btnLogout.addEventListener("click", async () => {
+        clearTimeout(state.saveTimer);
+        await signOut(auth);
+      });
 
-      els.searchInput.addEventListener('input', (e) => {
+      els.btnNewNote.addEventListener("click", createNewNote);
+      els.btnOpenTutorial.addEventListener("click", openTutorial);
+      els.btnEmptyTutorial.addEventListener("click", openTutorial);
+      els.btnCloseTutorial.addEventListener("click", closeTutorial);
+      els.btnStartFromTutorial.addEventListener("click", createNewNote);
+
+      els.inputTitle.addEventListener("input", handleEditorInput);
+      els.inputBody.addEventListener("input", handleEditorInput);
+      els.btnPin.addEventListener("click", togglePin);
+      els.btnDelete.addEventListener("click", deleteCurrentNote);
+
+      els.searchInput.addEventListener("input", (e) => {
         state.searchQuery = e.target.value;
         renderNoteList();
       });
 
-      els.backButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-          els.appContainer.classList.remove('mobile-detail-open');
+      els.backButtons.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          els.appContainer.classList.remove("mobile-detail-open");
           state.isTutorialOpen = false;
           state.activeNoteId = null;
           renderNoteList();
@@ -1073,17 +1345,66 @@
       });
     }
 
-    async function init() {
-      bindEvents();
-      state.notes = await StorageService.loadNotes();
-      renderNoteList();
-
-      if (window.innerWidth > 768 && state.notes.length > 0) {
-        const sorted = sortNotes(state.notes);
-        selectNote(sorted[0].id, false);
-      } else {
-        updateRightPaneVisibility();
+    function cleanupUserSession() {
+      if (typeof state.unsubscribeNotes === "function") {
+        state.unsubscribeNotes();
+        state.unsubscribeNotes = null;
       }
+      state.user = null;
+      state.notes = [];
+      state.activeNoteId = null;
+      state.isTutorialOpen = false;
+      state.lastSavedSignature.clear();
+      els.appContainer.classList.remove("authenticated", "mobile-detail-open");
+      els.loginScreen.style.display = "flex";
+    }
+
+    function init() {
+      bindEvents();
+
+      onAuthStateChanged(auth, async (user) => {
+        if (!user) {
+          cleanupUserSession();
+          return;
+        }
+
+        state.user = user;
+        els.loginError.textContent = "";
+        els.loginScreen.style.display = "none";
+        els.appContainer.classList.add("authenticated");
+        els.userEmailLabel.textContent = user.email || "Googleアカウント";
+
+        try {
+          await StorageService.ensureInitialNoteIfEmpty(user.uid);
+        } catch (err) {
+          console.error("Initial note error:", err);
+          setSaveStatus("error", "接続エラー");
+        }
+
+        if (typeof state.unsubscribeNotes === "function") {
+          state.unsubscribeNotes();
+        }
+
+        state.unsubscribeNotes = StorageService.subscribeNotes(
+          (cloudNotes) => {
+            state.notes = cloudNotes;
+            cloudNotes.forEach((n) => {
+              state.lastSavedSignature.set(n.id, getNoteSignature(n));
+            });
+
+            if (window.innerWidth > 768 && state.notes.length > 0 && !state.activeNoteId && !state.isTutorialOpen) {
+              const sorted = sortNotes(state.notes);
+              state.activeNoteId = sorted[0].id;
+            }
+
+            renderNoteList();
+            updateRightPaneVisibility();
+          },
+          () => {
+            setSaveStatus("error", "同期エラー");
+          }
+        );
+      });
     }
 
     init();
